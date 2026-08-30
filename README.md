@@ -3,11 +3,11 @@
 </p>
 
 <p align="center">
-  <a target="_blank" href="https://ly.safepoint.cloud/Br48PoX">📖 官方网站</a> &nbsp; | &nbsp;
+  <a target="_blank" href="https://ly.safepoint.cloud/Br48PoX">📖 官方网站</a>   |  
   <a target="_blank" href="/images/wechat.png">🙋‍♂️ 微信交流群</a>
 </p>
 
-## 👋 项目介绍
+## 👋 项目介绍xxx
 
 PandaWiki 是一款 AI 大模型驱动的**开源知识库搭建系统**，帮助你快速构建智能化的 **产品文档、技术文档、FAQ、博客系统**，借助大模型的力量为你提供 **AI 创作、AI 问答、AI 搜索** 等能力。
 
@@ -17,10 +17,10 @@ PandaWiki 是一款 AI 大模型驱动的**开源知识库搭建系统**，帮�
 
 ## ⚡️ 界面展示
 
-| PandaWiki 控制台                                 | Wiki 网站前台                                    |
-| ------------------------------------------------ | ------------------------------------------------ |
-| <img src="/images/screenshot-1.png" width=370 /> | <img src="/images/screenshot-2.png" width=370 /> |
-| <img src="/images/screenshot-3.png" width=370 /> | <img src="/images/screenshot-4.png" width=370 /> |
+| PandaWiki 控制台 | Wiki 网站前台 |
+| ---------------- | ------------- |
+|                  |               |
+|                  |               |
 
 ## 🔥 功能与特色
 
@@ -62,18 +62,12 @@ SUCCESS    密码: **********************
 ### 配置 AI 模型
 
 > PandaWiki 是由 AI 大模型驱动的 Wiki 系统，在未配置大模型的情况下 AI 创作、AI 问答、AI 搜索 等功能无法正常使用。
-> 
+
 首次登录时会提示需要先配置 AI 模型，可自行选择一键配置或手动配置。
 
 <div align="center">
   <img src="/images/model-config-1.png" width="800" />
   <p><em>一键自动配置 AI 模型</em></p>
-
-  <img src="/images/model-config-2.png" width="800" />
-  <p><em>手动自定义配置 AI 模型</em></p>
-</div>
-
-
 
 > 推荐使用 [百智云模型广场](https://baizhi.cloud/) 快速接入 AI 模型，注册即可获赠 5 元的模型使用额度。
 > 关于大模型的更多配置细节请参考 [接入 AI 模型](https://pandawiki.docs.baizhi.cloud/node/01971616-811c-70e1-82d9-706a202b8498)。
@@ -81,7 +75,6 @@ SUCCESS    密码: **********************
 ### 创建知识库
 
 “知识库” 是一组文档的集合，PandaWiki 将会根据知识库中的文档，为不同的知识库分别创建 “Wiki 网站”。
-<img src="/images/createkb.png" width="800" />
 
 ### 💪 开始使用
 
@@ -89,15 +82,14 @@ SUCCESS    密码: **********************
 
 - 访问 **控制台** 来管理你的知识库并上传文档等待学习成功
 - 访问 **Wiki 网站** 使用知识库并测试AI问答效果
-<img src="/images/AI-QA.png" width="700" />
 
 ### 💬 遇到问题
 
 如在使用产品过程中遇到问题，可通过以下方式获取帮助：
+
 - 📘查阅官方文档：[常见问题](https://pandawiki.docs.baizhi.cloud/node/019b4952-4ed3-7514-ba57-c93a8ca13608)，更多内容请参考文档目录。
 - 🤖不想翻文档？试试 [AI 问答](https://pandawiki.docs.baizhi.cloud/node/0197160c-782c-74ad-a4b7-857dae148f84)，快速获取答案。
 - 🤝加入社区：扫码加入下方企业微信群，与更多用户及官方人员交流经验、获得帮助。
-
 
 ## 社区交流
 
@@ -117,7 +109,6 @@ SUCCESS    密码: **********************
 - 你必须以相同的许可证开源你的修改
 - 如果你通过网络提供服务，也必须开源你的代码
 - 商业使用需要遵守相同的开源要求
-
 
 ## Star History
 
