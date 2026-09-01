@@ -44,14 +44,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const icon = getImagePath(kbDetail?.settings?.icon || '', basePath);
   return {
     metadataBase: new URL(process.env.TARGET || ''),
-    title: kbDetail?.settings?.title || 'Panda-Wiki',
+    title: kbDetail?.settings?.title || '智采商城自助服务知识库',
     description: kbDetail?.settings?.desc || '',
     keywords: kbDetail?.settings?.keyword || '',
     icons: {
       icon: icon || `${basePath}/favicon.png`,
     },
     openGraph: {
-      title: kbDetail?.settings?.title || 'Panda-Wiki',
+      title: kbDetail?.settings?.title || '智采商城自助服务知识库',
       description: kbDetail?.settings?.desc || '',
       images: icon ? [icon] : [],
     },
