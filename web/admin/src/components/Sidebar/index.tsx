@@ -155,7 +155,7 @@ const Sidebar = () => {
           borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        PandaWiki
+        智采商城自助服务知识库
       </Box>
       <Stack sx={{ py: 2, flexGrow: 1 }} gap={1}>
         {menus.map(it => {
