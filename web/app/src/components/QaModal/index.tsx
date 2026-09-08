@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import {
   Box,
   Button,
-  Typography,
   Modal,
   Stack,
   lighten,
@@ -243,37 +242,6 @@ const QaModal: React.FC<QaModalProps> = () => {
           <SearchDocContent inputRef={inputRef} placeholder={placeholder} />
         </Box>
 
-        {/* 底部AI生成提示 */}
-        <Box
-          sx={{
-            px: 3,
-            pt: !kbDetail?.settings?.conversation_setting
-              ?.copyright_hide_enabled
-              ? 2
-              : 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Typography
-            variant='caption'
-            sx={{
-              color: 'text.disabled',
-              fontSize: 12,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
-            <Box>
-              {!kbDetail?.settings?.conversation_setting
-                ?.copyright_hide_enabled &&
-                (kbDetail?.settings?.conversation_setting?.copyright_info ||
-                  '本网站由 PandaWiki 提供技术支持')}
-            </Box>
-          </Typography>
-        </Box>
       </Box>
     </Modal>
   );

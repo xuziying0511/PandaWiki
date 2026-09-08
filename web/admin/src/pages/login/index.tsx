@@ -84,7 +84,7 @@ const Login = () => {
                 mb: 4,
               }}
             >
-              PandaWiki
+              智采商城自助服务知识库
             </Stack>
             <TextField
               value={account}
