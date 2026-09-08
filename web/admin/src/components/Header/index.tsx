@@ -77,7 +77,7 @@ const Header = () => {
             }
           }}
         >
-          访问 Wiki 网站
+          访问知识库
         </Button>
         <System />
         <Tooltip arrow title='退出登录'>
