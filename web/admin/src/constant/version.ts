@@ -130,7 +130,7 @@ export const VERSION_INFO: Record<ConstsLicenseEdition, VersionInfo> = {
     label: '开源版',
     features: {
       wikiCount: 1,
-      docCountPerWiki: 300,
+      docCountPerWiki: 10000,
       adminCount: 1,
       adminPermissionControl: FeatureStatus.NOT_SUPPORTED,
       seoConfig: FeatureStatus.BASIC,
