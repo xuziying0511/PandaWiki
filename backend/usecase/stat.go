@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"sort"
 
 	"github.com/jinzhu/copier"
@@ -67,15 +66,7 @@ func (u *StatUseCase) ValidateStatDay(statDay consts.StatDay, edition consts.Lic
 	switch statDay {
 	case consts.StatDay1:
 		return nil
-	case consts.StatDay7:
-		if edition == consts.LicenseEditionFree {
-			return domain.ErrPermissionDenied
-		}
-		return nil
-	case consts.StatDay30, consts.StatDay90:
-		if !slices.Contains([]consts.LicenseEdition{consts.LicenseEditionBusiness, consts.LicenseEditionEnterprise}, edition) {
-			return domain.ErrPermissionDenied
-		}
+	case consts.StatDay7, consts.StatDay30, consts.StatDay90:
 		return nil
 	default:
 		u.logger.Error("stat day is invalid")

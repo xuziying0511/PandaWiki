@@ -8,12 +8,6 @@ import HotDocs from './HotDocs';
 import QAReferer from './QAReferer';
 import RTVisitor from './RTVisitor';
 import TypeCount from './TypeCount';
-import { useAppSelector } from '@/store';
-import { VersionCanUse } from '@/components/VersionMask';
-import {
-  BUSINESS_VERSION_PERMISSION,
-  PROFESSION_VERSION_PERMISSION,
-} from '@/constant/version';
 
 export const TimeList = [
   { label: '近 24 小时', value: 1 },
@@ -25,71 +19,27 @@ export const TimeList = [
 export type ActiveTab = 1 | 7 | 30 | 90;
 
 const Statistic = () => {
-  const { license } = useAppSelector(state => state.config);
   const [tab, setTab] = useState<ActiveTab>(1);
   const isWideScreen = useMediaQuery('(min-width:1190px)');
 
-  const timeList = useMemo(() => {
-    const isPro = PROFESSION_VERSION_PERMISSION.includes(license.edition!);
-    const isBusiness = BUSINESS_VERSION_PERMISSION.includes(license.edition!);
-    return [
+  const timeList = useMemo(() => [
       { label: '近 24 小时', value: 1, disabled: false },
       {
-        label: (
-          <Stack
-            direction={'row'}
-            alignItems={'center'}
-            gap={0.5}
-            sx={{ lineHeight: 1 }}
-          >
-            <span>近 7 天</span>
-            <VersionCanUse
-              permission={PROFESSION_VERSION_PERMISSION}
-              mode='icon'
-            />
-          </Stack>
-        ),
+        label: '近 7 天',
         value: 7,
-        disabled: !isPro,
+        disabled: false,
       },
       {
-        label: (
-          <Stack
-            direction={'row'}
-            alignItems={'center'}
-            gap={0.5}
-            sx={{ lineHeight: 1 }}
-          >
-            <span>近 30 天</span>
-            <VersionCanUse
-              permission={BUSINESS_VERSION_PERMISSION}
-              mode='icon'
-            />
-          </Stack>
-        ),
+        label: '近 30 天',
         value: 30,
-        disabled: !isBusiness,
+        disabled: false,
       },
       {
-        label: (
-          <Stack
-            direction={'row'}
-            alignItems={'center'}
-            gap={0.5}
-            sx={{ lineHeight: 1 }}
-          >
-            <span>近 90 天</span>
-            <VersionCanUse
-              permission={BUSINESS_VERSION_PERMISSION}
-              mode='icon'
-            />
-          </Stack>
-        ),
+        label: '近 90 天',
         value: 90,
-        disabled: !isBusiness,
+        disabled: false,
       },
-    ];
-  }, [license]);
+  ], []);
 
   return (
     <Box sx={{ p: 2 }}>
