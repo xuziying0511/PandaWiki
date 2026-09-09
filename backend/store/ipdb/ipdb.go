@@ -32,7 +32,13 @@ func NewIPDB(config *config.Config, logger *log.Logger) (*IPDB, error) {
 	return &IPDB{searcher: searcher, logger: logger.WithModule("store.ipdb")}, nil
 }
 
-func (a *IPDB) Lookup(ip string) (*domain.IPAddress, error) {
+func (a *IPDB) Lookup(ip string) (result *domain.IPAddress, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			a.logger.Error("ipdb lookup panic", log.Any("error", r), log.String("ip", ip))
+			err = fmt.Errorf("ipdb lookup panic: %v", r)
+		}
+	}()
 	region, err := a.searcher.SearchByStr(ip)
 	if err != nil {
 		return nil, fmt.Errorf("search ip failed: %w", err)
