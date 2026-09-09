@@ -10,7 +10,6 @@ import {
   styled,
   Tab,
   Tabs,
-  Typography,
 } from '@mui/material';
 import { IconJinsousuo, IconZhinengwenda } from '@panda-wiki/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -191,33 +190,6 @@ const Widget = () => {
       >
         <SearchDocContent inputRef={inputRef} placeholder={placeholder} />
       </Box>
-      {!widget?.settings?.widget_bot_settings?.copyright_hide_enabled && (
-        <Box
-          sx={{
-            px: 3,
-            pt: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Typography
-            variant='caption'
-            sx={{
-              color: 'text.disabled',
-              fontSize: 12,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
-            <Box>
-              {widget?.settings?.widget_bot_settings?.copyright_info ||
-                '本网站由 PandaWiki 提供技术支持'}
-            </Box>
-          </Typography>
-        </Box>
-      )}
     </Box>
   );
 };
