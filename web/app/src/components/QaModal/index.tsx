@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { IconZhinengwenda, IconJinsousuo } from '@panda-wiki/icons';
+import { IconJinsousuo } from '@panda-wiki/icons';
 import { useSearchParams } from 'next/navigation';
 import {
   Box,
@@ -176,7 +176,7 @@ const QaModal: React.FC<QaModalProps> = () => {
             <StyledTab
               label={
                 <Stack direction='row' gap={0.5} alignItems='center'>
-                  <IconZhinengwenda sx={{ fontSize: 16 }} />
+                  <img src='/images/qa-custom-icon.png' alt='' width={16} height={16} />
                   {!mobile && <span>智能问答</span>}
                 </Stack>
               }
