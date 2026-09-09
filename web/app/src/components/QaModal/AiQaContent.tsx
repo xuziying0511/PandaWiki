@@ -1049,9 +1049,6 @@ const AiQaContent: React.FC<{
                         </>
                       )}
                     </Stack>
-                    <Box>
-                      {kbDetail?.settings?.disclaimer_settings?.content}
-                    </Box>
                   </StyledActionStack>
                 )}
               </StyledAiBubble>

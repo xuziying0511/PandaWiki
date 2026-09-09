@@ -21,7 +21,7 @@ import (
 	"github.com/chaitin/panda-wiki/store/cache"
 )
 
-const defaultWebAppCopyright = "本回答由 PandaWiki 基于 AI 生成，仅供参考。"
+const defaultWebAppCopyright = ""
 
 type AppUsecase struct {
 	repo          *pg.AppRepository
