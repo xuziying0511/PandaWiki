@@ -15,7 +15,6 @@ import CardStyle from './CardStyle';
 import CardWebCustomCode from './CardWebCustomCode';
 import CardWebSEO from './CardWebSEO';
 import CardQaCopyright from './CardQaCopyright';
-import CardWebStats from './CardWebStats';
 
 interface CardWebProps {
   kb: DomainKnowledgeBaseDetail;
@@ -131,22 +130,6 @@ const CardWeb = ({ kb, refresh }: CardWebProps) => {
             settings: {
               ...info.settings,
               ...value,
-            },
-          });
-        }}
-      />
-      <CardWebStats
-        id={info.id}
-        data={info}
-        refresh={value => {
-          setInfo({
-            ...info,
-            settings: {
-              ...info.settings,
-              stats_setting: {
-                ...info.settings?.stats_setting,
-                ...value,
-              },
             },
           });
         }}
