@@ -14,9 +14,15 @@ interface ExportButtonProps {
   kbId: string;
   subject: string;
   remoteIp: string;
+  selectedRecords: DomainConversationListItem[];
 }
 
-const ExportButton = ({ kbId, subject, remoteIp }: ExportButtonProps) => {
+const ExportButton = ({
+  kbId,
+  subject,
+  remoteIp,
+  selectedRecords,
+}: ExportButtonProps) => {
   const controllerRef = useRef<AbortController | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
 
@@ -24,36 +30,45 @@ const ExportButton = ({ kbId, subject, remoteIp }: ExportButtonProps) => {
     return () => controllerRef.current?.abort();
   }, [kbId]);
 
-  const handleExport = async () => {
-    if (controllerRef.current || !kbId) return;
+  const handleExport = async (selectedOnly: boolean) => {
+    if (
+      controllerRef.current ||
+      !kbId ||
+      (selectedOnly && selectedRecords.length === 0)
+    )
+      return;
     const controller = new AbortController();
     controllerRef.current = controller;
     const { signal } = controller;
     setProgress('读取记录…');
 
     try {
-      const records: DomainConversationListItem[] = [];
-      const seen = new Set<string>();
-      let expectedTotal = 0;
-      for (let page = 1; ; page += 1) {
-        const result = await getApiV1Conversation(
-          { kb_id: kbId, subject, remote_ip: remoteIp, page, per_page: 100 },
-          { signal },
-        );
-        signal.throwIfAborted();
-        const items = result.data || [];
-        if (page === 1) expectedTotal = result.total || 0;
-        for (const item of items) {
-          if (!item.id) throw new Error('问答记录缺少 ID');
-          if (!seen.has(item.id)) {
-            seen.add(item.id);
-            records.push(item);
+      const records: DomainConversationListItem[] = selectedOnly
+        ? [...selectedRecords]
+        : [];
+      if (!selectedOnly) {
+        const seen = new Set<string>();
+        let expectedTotal = 0;
+        for (let page = 1; ; page += 1) {
+          const result = await getApiV1Conversation(
+            { kb_id: kbId, subject, remote_ip: remoteIp, page, per_page: 100 },
+            { signal },
+          );
+          signal.throwIfAborted();
+          const items = result.data || [];
+          if (page === 1) expectedTotal = result.total || 0;
+          for (const item of items) {
+            if (!item.id) throw new Error('问答记录缺少 ID');
+            if (!seen.has(item.id)) {
+              seen.add(item.id);
+              records.push(item);
+            }
           }
+          if (items.length === 0 || records.length >= expectedTotal) break;
         }
-        if (items.length === 0 || records.length >= expectedTotal) break;
-      }
-      if (records.length < expectedTotal) {
-        throw new Error('问答记录发生变化，请重新导出');
+        if (records.length < expectedTotal) {
+          throw new Error('问答记录发生变化，请重新导出');
+        }
       }
       if (records.length === 0) {
         message.info('当前筛选条件下暂无问答记录');
@@ -101,14 +116,23 @@ const ExportButton = ({ kbId, subject, remoteIp }: ExportButtonProps) => {
 
   return (
     <Stack direction='row' alignItems='center' gap={1} sx={{ flexShrink: 0 }}>
+      {selectedRecords.length > 0 && (
+        <Button
+          variant='contained'
+          disabled={!kbId || progress !== null}
+          onClick={() => handleExport(true)}
+        >
+          导出选中（{selectedRecords.length}）
+        </Button>
+      )}
       <Tooltip title='导出当前筛选条件下的全部问答及回答，CSV 可用 Excel/WPS 打开'>
         <span>
           <Button
             variant='outlined'
             disabled={!kbId || progress !== null}
-            onClick={handleExport}
+            onClick={() => handleExport(false)}
           >
-            {progress || '导出数据'}
+            {progress || '导出全部'}
           </Button>
         </span>
       </Tooltip>

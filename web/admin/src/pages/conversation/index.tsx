@@ -9,7 +9,7 @@ import { DomainConversationListItem } from '@/request/types';
 import { useAppSelector } from '@/store';
 import { Ellipsis, Table } from '@ctzhian/ui';
 import { ColumnType } from '@ctzhian/ui/dist/Table';
-import { Box, Stack } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import Detail from './Detail';
@@ -28,6 +28,14 @@ const Conversation = () => {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [open, setOpen] = useState(false);
+
+  const [selectedRecords, setSelectedRecords] = useState<
+    DomainConversationListItem[]
+  >([]);
+
+  useEffect(() => {
+    setSelectedRecords([]);
+  }, [kb_id, subject, remoteIp]);
 
   const columns: ColumnType<DomainConversationListItem>[] = [
     {
@@ -152,15 +160,42 @@ const Conversation = () => {
         direction='row'
         alignItems={'center'}
         justifyContent={'space-between'}
-        sx={{ p: 2 }}
+        sx={{ p: 2, gap: 2, flexWrap: 'wrap' }}
       >
         <Search />
-        <ExportButton kbId={kb_id} subject={subject} remoteIp={remoteIp} />
+        <Stack direction='row' alignItems='center' gap={1}>
+          {selectedRecords.length > 0 && (
+            <Button onClick={() => setSelectedRecords([])}>清空选择</Button>
+          )}
+          <ExportButton
+            kbId={kb_id}
+            subject={subject}
+            remoteIp={remoteIp}
+            selectedRecords={selectedRecords}
+          />
+        </Stack>
       </Stack>
       <Table
         columns={columns}
         dataSource={data}
         rowKey='id'
+        rowSelection={{
+          selectedRowKeys: data
+            .filter(item =>
+              selectedRecords.some(selected => selected.id === item.id),
+            )
+            .map(item => item.id!),
+          getCheckboxProps: record => ({ disabled: loading || !record.id }),
+          onChange: keys => {
+            if (loading) return;
+            setSelectedRecords(previous => [
+              ...previous.filter(
+                item => !data.some(record => record.id === item.id),
+              ),
+              ...data.filter(item => item.id && keys.includes(item.id)),
+            ]);
+          },
+        }}
         height='calc(100vh - 148px)'
         size='small'
         sx={{
