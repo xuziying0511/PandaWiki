@@ -14,6 +14,7 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import Detail from './Detail';
 import Search from './Search';
+import ExportButton from './ExportButton';
 
 const Conversation = () => {
   const { kb_id = '' } = useAppSelector(state => state.config);
@@ -154,6 +155,7 @@ const Conversation = () => {
         sx={{ p: 2 }}
       >
         <Search />
+        <ExportButton kbId={kb_id} subject={subject} remoteIp={remoteIp} />
       </Stack>
       <Table
         columns={columns}
