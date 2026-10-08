@@ -15,15 +15,9 @@ import LoadingIcon from '@/assets/images/loading.png';
 import Image from 'next/image';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useStore } from '@/provider';
-import Feedback from '@/components/feedback';
+import AnswerEvaluation from '@/components/feedback/AnswerEvaluation';
 import { ConstsSourceType, V1WechatAppInfoResp } from '@/request/types';
 import { useBasePath } from '@/hooks';
-import {
-  IconADiancaiWeixuanzhong2,
-  IconDiancaiWeixuanzhong,
-  IconDianzanXuanzhong1,
-  IconDianzanWeixuanzhong,
-} from '@panda-wiki/icons';
 
 interface Message {
   id: string;
@@ -238,7 +232,6 @@ const H5Chat = () => {
   const [answer, setAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [message_id, setMessageId] = useState('');
-  const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState('');
   const { kbDetail } = useStore();
   const basePath = useBasePath();
@@ -286,14 +279,16 @@ const H5Chat = () => {
     type?: string,
     content?: string,
   ) => {
-    const data: any = {
-      conversation_id: searchParams.get('id'),
-      message_id,
-      score,
-    };
-    if (type) data.type = type;
-    if (content) data.feedback_content = content;
-    await postShareV1ChatFeedback(data);
+    await postShareV1ChatFeedback(
+      {
+        conversation_id: searchParams.get('id') || '',
+        message_id,
+        score,
+        type: type || '',
+        feedback_content: content || '',
+      },
+      { isAlert: false },
+    );
     setScore(score);
     message.success('反馈成功');
   };
@@ -420,7 +415,12 @@ const H5Chat = () => {
                       }}
                     >
                       <Box>{disclaimerContent}</Box>
-                      <Stack direction='row' alignItems='center' gap={3}>
+                      <Stack
+                        direction='row'
+                        alignItems='center'
+                        gap={2}
+                        flexWrap='wrap'
+                      >
                         <IconCopy
                           sx={{ cursor: 'pointer', color: 'text.primary' }}
                           onClick={() => {
@@ -429,36 +429,11 @@ const H5Chat = () => {
                         />
 
                         {isFeedbackEnabled && (
-                          <>
-                            {score === 1 && (
-                              <IconDianzanXuanzhong1
-                                sx={{ cursor: 'pointer' }}
-                              />
-                            )}
-                            {score !== 1 && (
-                              <IconDianzanWeixuanzhong
-                                sx={{ cursor: 'pointer' }}
-                                onClick={() => {
-                                  if (score === 0) handleScore(message_id, 1);
-                                }}
-                              />
-                            )}
-                            {score !== -1 && (
-                              <IconDiancaiWeixuanzhong
-                                sx={{ cursor: 'pointer' }}
-                                onClick={() => {
-                                  if (score === 0) {
-                                    setOpen(true);
-                                  }
-                                }}
-                              />
-                            )}
-                            {score === -1 && (
-                              <IconADiancaiWeixuanzhong2
-                                sx={{ cursor: 'pointer' }}
-                              />
-                            )}
-                          </>
+                          <AnswerEvaluation
+                            messageId={message_id}
+                            score={score}
+                            onSubmit={handleScore}
+                          />
                         )}
                       </Stack>
                     </Stack>
@@ -469,13 +444,7 @@ const H5Chat = () => {
           )}
         </StyledMessages>
       </StyledMessagesContainer>
-      <Feedback
-        open={open}
-        onClose={() => setOpen(false)}
-        onSubmit={handleScore}
-        data={{ message_id: message_id }}
-        tags={appSetting?.feedback_type}
-      />
+
       {loading && <ChatLoading onClick={handleSearchAbort} />}
       <Zoom in={showScrollTop}>
         <Fab

@@ -2,7 +2,7 @@
 import aiLoading from '@/assets/images/ai-loading.gif';
 import Logo from '@/assets/images/logo.png';
 import { ChunkResultItem } from '@/assets/type';
-import Feedback from '@/components/feedback';
+import AnswerEvaluation from '@/components/feedback/AnswerEvaluation';
 import { IconCopy } from '@/components/icons';
 import MarkDown2 from '@/components/markdown2';
 import { useBasePath, useSmartScroll } from '@/hooks';
@@ -25,10 +25,6 @@ import {
   useTheme,
 } from '@mui/material';
 import {
-  IconADiancaiWeixuanzhong2,
-  IconDiancaiWeixuanzhong,
-  IconDianzanWeixuanzhong,
-  IconDianzanXuanzhong1,
   IconFasong,
   IconTupian,
   IconXinduihua,
@@ -147,9 +143,6 @@ const AiQaContent: React.FC<{
   const [nonce, setNonce] = useState('');
   const [conversationId, setConversationId] = useState('');
   const [input, setInput] = useState('');
-  const [open, setOpen] = useState(false);
-  const [conversationItem, setConversationItem] =
-    useState<ConversationItem | null>(null);
   const [uploadedImages, setUploadedImages] = useState<
     Array<{
       id: string;
@@ -593,17 +586,19 @@ const AiQaContent: React.FC<{
     type?: string,
     content?: string,
   ) => {
-    const data: any = {
-      conversation_id: conversationId,
-      message_id,
-      score,
-    };
-    if (type) data.type = type;
-    if (content) data.feedback_content = content;
-    await postShareV1ChatFeedback(data);
+    await postShareV1ChatFeedback(
+      {
+        conversation_id: conversationId,
+        message_id,
+        score,
+        type: type || '',
+        feedback_content: content || '',
+      },
+      { isAlert: false },
+    );
     message.success('反馈成功');
-    setConversation(
-      conversation.map(item => {
+    setConversation(previous =>
+      previous.map(item => {
         return item.message_id === message_id ? { ...item, score } : item;
       }),
     );
@@ -1006,7 +1001,12 @@ const AiQaContent: React.FC<{
                     justifyContent='space-between'
                     gap={mobile ? 1 : 3}
                   >
-                    <Stack direction='row' gap={3} alignItems='center'>
+                    <Stack
+                      direction='row'
+                      gap={2}
+                      alignItems='center'
+                      flexWrap='wrap'
+                    >
                       <span>生成于 {dayjs(item.update_time).fromNow()}</span>
 
                       <IconCopy
@@ -1017,36 +1017,11 @@ const AiQaContent: React.FC<{
                       />
 
                       {isFeedbackEnabled && item.source === 'chat' && (
-                        <>
-                          {item.score === 1 && (
-                            <IconDianzanXuanzhong1 sx={{ cursor: 'pointer' }} />
-                          )}
-                          {item.score !== 1 && (
-                            <IconDianzanWeixuanzhong
-                              sx={{ cursor: 'pointer' }}
-                              onClick={() => {
-                                if (item.score === 0)
-                                  handleScore(item.message_id, 1);
-                              }}
-                            />
-                          )}
-                          {item.score !== -1 && (
-                            <IconDiancaiWeixuanzhong
-                              sx={{ cursor: 'pointer' }}
-                              onClick={() => {
-                                if (item.score === 0) {
-                                  setConversationItem(item);
-                                  setOpen(true);
-                                }
-                              }}
-                            />
-                          )}
-                          {item.score === -1 && (
-                            <IconADiancaiWeixuanzhong2
-                              sx={{ cursor: 'pointer' }}
-                            />
-                          )}
-                        </>
+                        <AnswerEvaluation
+                          messageId={item.message_id}
+                          score={item.score}
+                          onSubmit={handleScore}
+                        />
                       )}
                     </Stack>
                   </StyledActionStack>
@@ -1221,13 +1196,6 @@ const AiQaContent: React.FC<{
             ))}
           </StyledFuzzySuggestionsStack>
         )}
-
-      <Feedback
-        open={open}
-        onClose={() => setOpen(false)}
-        onSubmit={handleScore}
-        data={conversationItem}
-      />
     </StyledMainContainer>
   );
 };

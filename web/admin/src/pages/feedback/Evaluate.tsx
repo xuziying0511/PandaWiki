@@ -68,18 +68,18 @@ const Evaluate = () => {
       title: '用户反馈',
       width: 160,
       render: (value: DomainConversationMessageListItem['info']) => {
+        // The generated client still describes the legacy like/dislike scores.
+        const score = Number(value?.score ?? 0);
         return (
           <Tooltip
             title={
-              (value!.feedback_content || +value!.feedback_type! > 0) && (
+              (value?.feedback_content || value?.feedback_type) && (
                 <Box>
-                  {+value!.feedback_type! > 0 && (
+                  {value?.feedback_type && (
                     <Box>
-                      {
-                        FeedbackType[
-                          value?.feedback_type as unknown as keyof typeof FeedbackType
-                        ]
-                      }
+                      {FeedbackType[
+                        value.feedback_type as unknown as keyof typeof FeedbackType
+                      ] || value.feedback_type}
                     </Box>
                   )}
                   {value?.feedback_content && (
@@ -95,7 +95,11 @@ const Evaluate = () => {
               gap={0.5}
               sx={{ cursor: 'pointer', fontSize: 14 }}
             >
-              {value!.score === 1 ? (
+              {score === 3 ? (
+                <Box sx={{ color: 'success.main' }}>已解决</Box>
+              ) : score === 4 ? (
+                <Box sx={{ color: 'error.main' }}>未解决</Box>
+              ) : score === 1 ? (
                 <IconDianzanXuanzhong1
                   sx={{
                     fontSize: 14,
@@ -103,7 +107,9 @@ const Evaluate = () => {
                     color: 'success.main',
                   }}
                 />
-              ) : value!.score === -1 ? (
+              ) : score === 2 ? (
+                <Box sx={{ color: 'warning.main' }}>部分解决</Box>
+              ) : score === -1 ? (
                 <IconADiancaiWeixuanzhong2
                   sx={{
                     fontSize: 14,
