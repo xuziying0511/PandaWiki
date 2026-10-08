@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test:export": "node --test scripts/conversation-export.test.mjs",
     "build:dev": "vite build --m development",
     "build": "tsc -b && vite build",
     "generate-routes": "node scripts/generate-routes.js",
@@ -23,6 +24,7 @@
     "clsx": "^2.1.1",
     "echarts": "^5.6.0",
     "emoji-mart": "^5.6.0",
+    "exceljs": "4.4.0",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.22",
     "lodash-es": "^4.17.21",

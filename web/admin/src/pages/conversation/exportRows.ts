@@ -4,19 +4,6 @@ import type {
 } from '@/request/types';
 import dayjs from 'dayjs';
 
-const headers = [
-  '会话ID',
-  '会话主题',
-  '来源渠道',
-  '来源用户',
-  '来源IP',
-  '问答时间',
-  '轮次',
-  '问题',
-  '问题图片',
-  'AI回答',
-];
-
 export const conversationRows = (
   record: DomainConversationListItem,
   detail: DomainConversationDetailResp,
@@ -70,20 +57,4 @@ export const conversationRows = (
     flush();
   }
   return rows;
-};
-
-export const toCsv = (rows: string[][]): string => {
-  const escapeCell = (value: string) => {
-    // 防止用户问题或模型回答被电子表格当作公式执行。
-    const safe =
-      /^\s*[=+\-@]/.test(value) || /^[\t\r\n]/.test(value)
-        ? `'${value}`
-        : value;
-    return `"${safe.replace(/"/g, '""')}"`;
-  };
-  // BOM 让 Excel 正确识别中文；引用单元格以保留换行和逗号。
-  return (
-    '\uFEFF' +
-    [headers, ...rows].map(row => row.map(escapeCell).join(',')).join('\r\n')
-  );
 };

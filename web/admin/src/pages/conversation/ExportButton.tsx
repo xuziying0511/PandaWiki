@@ -8,7 +8,7 @@ import { message } from '@ctzhian/ui';
 import { Button, Stack, Tooltip } from '@mui/material';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
-import { conversationRows, toCsv } from './exportCsv';
+import { conversationRows } from './exportRows';
 
 interface ExportButtonProps {
   kbId: string;
@@ -89,12 +89,23 @@ const ExportButton = ({
         rows.push(...conversationRows(record, detail, source));
       }
 
+      setProgress('生成 Excel…');
+      const { createConversationWorkbook } = await import('./exportXlsx');
+      signal.throwIfAborted();
+      const workbook = createConversationWorkbook(
+        rows,
+        dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      );
+      const buffer = await workbook.xlsx.writeBuffer();
+      signal.throwIfAborted();
       const url = URL.createObjectURL(
-        new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8;' }),
+        new Blob([new Uint8Array(buffer)], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        }),
       );
       const link = document.createElement('a');
       link.href = url;
-      link.download = `问答记录_${dayjs().format('YYYYMMDD_HHmmss')}.csv`;
+      link.download = `问答记录_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -125,7 +136,7 @@ const ExportButton = ({
           导出选中（{selectedRecords.length}）
         </Button>
       )}
-      <Tooltip title='导出当前筛选条件下的全部问答及回答，CSV 可用 Excel/WPS 打开'>
+      <Tooltip title='导出当前筛选条件下的全部问答及回答，Excel 文件含问答明细与会话目录，保留所有轮次'>
         <span>
           <Button
             variant='outlined'
