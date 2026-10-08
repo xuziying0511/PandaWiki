@@ -6,7 +6,7 @@ import { AppType, FeedbackType } from '@/constant/enums';
 import { tableSx } from '@/constant/styles';
 import { useURLSearchParams } from '@/hooks';
 import { useAppSelector } from '@/store';
-import { Box, Stack, Tooltip } from '@mui/material';
+import { Box, Button, Stack, Tooltip } from '@mui/material';
 import { Ellipsis, Table } from '@ctzhian/ui';
 import { ColumnsType } from '@ctzhian/ui/dist/Table';
 import {
@@ -17,6 +17,8 @@ import {
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import Detail from './Detail';
+import ExportButton from './ExportButton';
+import { feedbackReason } from './feedbackExportData';
 
 const Evaluate = () => {
   const { kb_id = '' } = useAppSelector(state => state.config);
@@ -32,6 +34,13 @@ const Evaluate = () => {
   const [id, setId] = useState('');
   const [feedbackInfo, setFeedbackInfo] =
     useState<DomainConversationMessageListItem>({});
+
+  const [selectedRecords, setSelectedRecords] = useState<
+    DomainConversationMessageListItem[]
+  >([]);
+  useEffect(() => {
+    setSelectedRecords([]);
+  }, [kb_id, subject, remoteIp]);
 
   const columns: ColumnsType<DomainConversationMessageListItem> = [
     {
@@ -129,6 +138,23 @@ const Evaluate = () => {
     },
     {
       dataIndex: 'info',
+      title: '反馈原因 / 补充说明',
+      width: 250,
+      render: (value: DomainConversationMessageListItem['info']) => (
+        <Stack gap={0.5}>
+          <Box>{feedbackReason(value)}</Box>
+          <Tooltip title={value?.feedback_content || '未填写补充说明'}>
+            <Box>
+              <Ellipsis sx={{ color: 'text.secondary', fontSize: 12 }}>
+                {value?.feedback_content || '未填写补充说明'}
+              </Ellipsis>
+            </Box>
+          </Tooltip>
+        </Stack>
+      ),
+    },
+    {
+      dataIndex: 'info',
       title: '来源用户',
       width: 200,
       render: (text, record) => {
@@ -210,17 +236,55 @@ const Evaluate = () => {
 
   return (
     <>
+      <Stack
+        direction='row'
+        alignItems='center'
+        justifyContent='space-between'
+        gap={2}
+        sx={{ px: 2, pb: 2, flexWrap: 'wrap' }}
+      >
+        <Box sx={{ color: 'text.secondary', fontSize: 13 }}>
+          每条评价对应一轮回答；未填写的原因不会自动推断。
+        </Box>
+        <Stack direction='row' gap={1} alignItems='center'>
+          {selectedRecords.length > 0 && (
+            <Button onClick={() => setSelectedRecords([])}>清空选择</Button>
+          )}
+          <ExportButton
+            key={kb_id}
+            kbId={kb_id}
+            selectedRecords={selectedRecords}
+          />
+        </Stack>
+      </Stack>
       <Table
         columns={columns}
         dataSource={data}
         rowKey='id'
-        height='calc(100vh - 148px)'
+        rowSelection={{
+          selectedRowKeys: data
+            .filter(item =>
+              selectedRecords.some(selected => selected.id === item.id),
+            )
+            .map(item => item.id!),
+          getCheckboxProps: record => ({ disabled: loading || !record.id }),
+          onChange: keys => {
+            if (loading) return;
+            setSelectedRecords(previous => [
+              ...previous.filter(
+                item => !data.some(record => record.id === item.id),
+              ),
+              ...data.filter(item => item.id && keys.includes(item.id)),
+            ]);
+          },
+        }}
+        height='calc(100vh - 208px)'
         size='small'
         sx={{
           overflow: 'hidden',
           ...tableSx,
           '.MuiTableContainer-root': {
-            height: 'calc(100vh - 148px - 70px)',
+            height: 'calc(100vh - 208px - 70px)',
           },
         }}
         pagination={{

@@ -1,4 +1,6 @@
+import { feedbackLabel, feedbackReason } from './feedbackExportData';
 import { ChatConversationPair } from '@/api';
+import type { DomainConversationMessageListItem } from '@/request/types';
 import { getApiV1ConversationMessageDetail } from '@/request';
 import MarkDown from '@/components/MarkDown';
 import { useAppSelector } from '@/store';
@@ -24,7 +26,7 @@ const Detail = ({
 }: {
   id: string;
   open: boolean;
-  data: any;
+  data: DomainConversationMessageListItem;
   onClose: () => void;
 }) => {
   const [conversations, setConversations] = useState<Omit<
@@ -44,7 +46,7 @@ const Detail = ({
         });
       });
     }
-  }, [open, data, id]);
+  }, [open, data, id, kb_id]);
 
   return (
     <Modal
@@ -66,6 +68,16 @@ const Detail = ({
       footer={null}
     >
       <Box sx={{ fontSize: 14 }}>
+        <Stack
+          gap={1}
+          sx={{ p: 2, mb: 2, bgcolor: 'action.hover', borderRadius: 1 }}
+        >
+          <Box>评价结果：{feedbackLabel(data?.info)}</Box>
+          <Box>反馈原因：{feedbackReason(data?.info)}</Box>
+          <Box sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
+            补充说明：{data?.info?.feedback_content || '未填写'}
+          </Box>
+        </Stack>
         <Box>
           <StyledConversationItem>
             {/* 用户问题气泡 - 右对齐 */}

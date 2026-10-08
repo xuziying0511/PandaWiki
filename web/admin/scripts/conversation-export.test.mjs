@@ -7,7 +7,9 @@ import ExcelJS from 'exceljs';
 
 // Compile the two pure export modules without requiring the browser or API.
 function loadModule(name) {
-  const url = new URL(`../src/pages/conversation/${name}.ts`, import.meta.url);
+  return loadUrl(new URL(`../src/pages/${name}.ts`, import.meta.url));
+}
+function loadUrl(url) {
   const code = ts.transpileModule(readFileSync(url, 'utf8'), {
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
@@ -17,14 +19,17 @@ function loadModule(name) {
   }).outputText;
   const module = { exports: {} };
   new Function('require', 'module', 'exports', code)(
-    createRequire(url),
+    specifier =>
+      specifier.startsWith('.')
+        ? loadUrl(new URL(`${specifier}.ts`, url))
+        : createRequire(url)(specifier),
     module,
     module.exports,
   );
   return module.exports;
 }
-const { conversationRows } = loadModule('exportRows');
-const { createConversationWorkbook } = loadModule('exportXlsx');
+const { conversationRows } = loadModule('conversation/exportRows');
+const { createConversationWorkbook } = loadModule('conversation/exportXlsx');
 const record = {
   id: 'session-a',
   subject: '框架协议',
@@ -114,4 +119,64 @@ test('拒绝 Excel 无法保存的超长单元格，避免静默截断数据', (
     'Wiki 网站',
   );
   assert.throws(() => createConversationWorkbook(rows, ''), /32767/);
+});
+
+const { feedbackExportRow } = loadModule('feedback/feedbackExportData');
+const { createFeedbackWorkbook } = loadModule('feedback/exportXlsx');
+
+test('反馈导出保留三档结果、真实原因及历史赞踩，不将缺失原因推断为解决理由', async () => {
+  const scores = [3, 2, 4, 1, -1];
+  const rows = scores.map((score, i) =>
+    feedbackExportRow(
+      {
+        id: `answer-${i}`,
+        conversation_id: 'same-session',
+        question: `问题${i}`,
+        info: { score: 1 },
+      },
+      {
+        id: `answer-${i}`,
+        conversation_id: 'same-session',
+        content: '<think>推理</think>正式答案',
+        info: {
+          score,
+          feedback_type: i === 0 ? '' : i === 4 ? '1' : '操作步骤不清楚',
+          feedback_content: i === 0 ? '' : '=用户原始补充',
+        },
+      },
+      'Wiki 网站',
+    ),
+  );
+  assert.deepEqual(
+    rows.map(row => row.result),
+    ['已解决', '部分解决', '未解决', '点赞（历史评价）', '点踩（历史评价）'],
+  );
+  assert.equal(rows[0].reason, '未填写');
+  assert.equal(rows[0].comment, '未填写');
+  assert.equal(rows[4].reason, '内容不准确');
+  assert.equal(rows[1].answer, '正式答案');
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(
+    await createFeedbackWorkbook(rows, '2026-10-08').xlsx.writeBuffer(),
+  );
+  const sheet = workbook.getWorksheet('反馈明细');
+  const index = workbook.getWorksheet('反馈索引');
+  assert.equal(sheet.rowCount, 9);
+  assert.equal(sheet.getCell('C5').value, '已解决');
+  assert.equal(sheet.getCell('D5').value, '未填写');
+  assert.equal(sheet.getCell('D6').value, '操作步骤不清楚');
+  assert.equal(sheet.getCell('E6').type, ExcelJS.ValueType.String);
+  assert.equal(sheet.getCell('E6').value, '=用户原始补充');
+  assert.equal(sheet.getCell('B5').value, sheet.getCell('B9').value);
+  assert.equal(index.getCell('G9').value, 'answer-4');
+  assert.equal(index.getCell('F9').value, 'same-session');
+  assert.equal(sheet.autoFilter, 'A4:H9');
+  assert.equal(sheet.getCell('A4').fill.fgColor.argb, 'FF2155A3');
+});
+
+test('反馈详情不匹配时中止导出，防止原因和回答错配', () => {
+  assert.throws(
+    () => feedbackExportRow({ id: 'a' }, { id: 'b' }, ''),
+    /不匹配/,
+  );
 });
