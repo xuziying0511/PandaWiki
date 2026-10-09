@@ -14,7 +14,6 @@ import CardProxy from './CardProxy';
 import CardStyle from './CardStyle';
 import CardWebCustomCode from './CardWebCustomCode';
 import CardWebSEO from './CardWebSEO';
-import CardQaCopyright from './CardQaCopyright';
 
 interface CardWebProps {
   kb: DomainKnowledgeBaseDetail;
@@ -77,18 +76,6 @@ const CardWeb = ({ kb, refresh }: CardWebProps) => {
       <CardListen kb={kb} refresh={refresh} />
       <CardProxy kb={kb} refresh={refresh} />
       <CardBasicInfo kb={kb} refresh={refresh} />
-      <CardQaCopyright
-        data={info}
-        refresh={value => {
-          setInfo({
-            ...info,
-            settings: {
-              ...info.settings,
-              conversation_setting: value,
-            },
-          });
-        }}
-      />
       <CardAuth kb={kb} refresh={refresh} />
       <CardCatalog
         id={info.id}
