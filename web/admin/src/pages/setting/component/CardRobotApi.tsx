@@ -16,8 +16,6 @@ import { useEffect, useState } from 'react';
 import { FormItem, SettingCardItem, SecretTextField } from './Common';
 import { DomainAppDetailResp } from '@/request/types';
 import { message } from '@ctzhian/ui';
-import { BUSINESS_VERSION_PERMISSION } from '@/constant/version';
-import { useAppSelector } from '@/store';
 
 const CardRobotApi = ({
   kb,
@@ -28,7 +26,6 @@ const CardRobotApi = ({
 }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [detail, setDetail] = useState<DomainAppDetailResp | null>(null);
-  const { license } = useAppSelector(state => state.config);
   const {
     control,
     handleSubmit,
@@ -109,7 +106,7 @@ const CardRobotApi = ({
       }
       onSubmit={onSubmit}
     >
-      <FormItem label='问答机器人 API' permission={BUSINESS_VERSION_PERMISSION}>
+      <FormItem label='问答机器人 API'>
         <FormControl>
           <Controller
             control={control}
@@ -140,7 +137,7 @@ const CardRobotApi = ({
         </FormControl>
       </FormItem>
 
-      {isEnabled && BUSINESS_VERSION_PERMISSION.includes(license.edition!) && (
+      {isEnabled && (
         <>
           <FormItem label='API Token' required>
             <Controller
