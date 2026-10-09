@@ -39,7 +39,7 @@ const Detail = ({
     if (open && id && data) {
       getApiV1ConversationMessageDetail({ id, kb_id }).then(res => {
         setConversations({
-          user: data.question,
+          user: data.question ?? '',
           assistant: res.content!,
           created_at: res.created_at!,
           thinking_content: '',
