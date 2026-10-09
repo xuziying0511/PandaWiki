@@ -1184,10 +1184,25 @@ definitions:
         description: 用户信息
       ip_address:
         $ref: '#/definitions/domain.IPAddress'
+      question_count:
+        description: 用户提问次数
+        type: integer
       remote_ip:
         type: string
       subject:
         type: string
+    type: object
+  domain.ConversationListResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/domain.ConversationListItem'
+        type: array
+      question_total:
+        description: 筛选条件下的用户提问总数
+        type: integer
+      total:
+        type: integer
     type: object
   domain.ConversationMessage:
     properties:
@@ -2977,15 +2992,6 @@ definitions:
       total:
         type: integer
     type: object
-  v1.ConversationListItems:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/domain.ConversationListItem'
-        type: array
-      total:
-        type: integer
-    type: object
   v1.CrawlerExportReq:
     properties:
       doc_id:
@@ -3810,7 +3816,7 @@ paths:
             - $ref: '#/definitions/domain.PWResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/v1.ConversationListItems'
+                  $ref: '#/definitions/domain.ConversationListResp'
               type: object
       summary: get conversation list
       tags:

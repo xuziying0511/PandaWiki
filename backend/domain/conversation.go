@@ -103,7 +103,15 @@ type ConversationListItem struct {
 
 	CreatedAt time.Time `json:"created_at"`
 
+	QuestionCount int64 `json:"question_count"` // 用户提问次数
+
 	FeedBackInfo *FeedBackInfo `json:"feedback_info" gorm:"-"` // 用户反馈信息
+}
+
+type ConversationListResp struct {
+	Total         uint64                  `json:"total"`
+	QuestionTotal int64                   `json:"question_total"` // 筛选条件下的用户提问总数
+	Data          []*ConversationListItem `json:"data"`
 }
 
 type ConversationDetailResp struct {

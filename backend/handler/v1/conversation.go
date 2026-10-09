@@ -35,8 +35,6 @@ func NewConversationHandler(echo *echo.Echo, baseHandler *handler.BaseHandler, l
 	return handler
 }
 
-type ConversationListItems = domain.PaginatedResult[[]domain.ConversationListItem]
-
 // GetConversationList
 //
 //	@Summary		get conversation list
@@ -45,7 +43,7 @@ type ConversationListItems = domain.PaginatedResult[[]domain.ConversationListIte
 //	@Accept			json
 //	@Produce		json
 //	@Param			req	query		domain.ConversationListReq	true	"conversation list request"
-//	@Success		200	{object}	domain.PWResponse{data=ConversationListItems}
+//	@Success		200	{object}	domain.PWResponse{data=domain.ConversationListResp}
 //	@Router			/api/v1/conversation [get]
 func (h *ConversationHandler) GetConversationList(c echo.Context) error {
 	var request domain.ConversationListReq

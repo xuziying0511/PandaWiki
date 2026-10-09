@@ -681,8 +681,17 @@ export interface DomainConversationListItem {
   /** 用户信息 */
   info?: DomainConversationInfo;
   ip_address?: DomainIPAddress;
+  /** 用户提问次数 */
+  question_count?: number;
   remote_ip?: string;
   subject?: string;
+}
+
+export interface DomainConversationListResp {
+  data?: DomainConversationListItem[];
+  /** 筛选条件下的用户提问总数 */
+  question_total?: number;
+  total?: number;
 }
 
 export interface DomainConversationMessage {
@@ -1619,11 +1628,6 @@ export interface V1AuthSetReq {
 
 export interface V1CommentLists {
   data?: DomainCommentListItem[];
-  total?: number;
-}
-
-export interface V1ConversationListItems {
-  data?: DomainConversationListItem[];
   total?: number;
 }
 

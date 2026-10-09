@@ -27,6 +27,7 @@ const Conversation = () => {
   const [data, setData] = useState<DomainConversationListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
+  const [questionTotal, setQuestionTotal] = useState(0);
   const [open, setOpen] = useState(false);
 
   const [selectedRecords, setSelectedRecords] = useState<
@@ -111,6 +112,12 @@ const Conversation = () => {
       },
     },
     {
+      dataIndex: 'question_count',
+      title: '提问数',
+      width: 90,
+      render: (text?: number) => text ?? 0,
+    },
+    {
       dataIndex: 'created_at',
       title: '问答时间',
       width: 160,
@@ -139,6 +146,7 @@ const Conversation = () => {
       .then(res => {
         setData(res.data || []);
         setTotal(res.total || 0);
+        setQuestionTotal(res.question_total || 0);
       })
       .finally(() => {
         setLoading(false);
@@ -164,6 +172,9 @@ const Conversation = () => {
       >
         <Search />
         <Stack direction='row' alignItems='center' gap={1}>
+          <Box sx={{ fontSize: 14, color: 'text.secondary' }}>
+            共 {total} 次会话，{questionTotal} 次提问
+          </Box>
           {selectedRecords.length > 0 && (
             <Button onClick={() => setSelectedRecords([])}>清空选择</Button>
           )}

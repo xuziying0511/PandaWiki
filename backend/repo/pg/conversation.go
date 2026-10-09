@@ -38,8 +38,7 @@ func (r *ConversationRepository) CreateConversation(ctx context.Context, convers
 	return r.db.WithContext(ctx).Create(conversation).Error
 }
 
-func (r *ConversationRepository) GetConversationList(ctx context.Context, request *domain.ConversationListReq) ([]*domain.ConversationListItem, uint64, error) {
-	conversations := []*domain.ConversationListItem{}
+func (r *ConversationRepository) conversationListQuery(ctx context.Context, request *domain.ConversationListReq) *gorm.DB {
 	query := r.db.WithContext(ctx).
 		Model(&domain.Conversation{}).
 		Where("conversations.kb_id = ?", request.KBID)
@@ -53,13 +52,19 @@ func (r *ConversationRepository) GetConversationList(ctx context.Context, reques
 	if request.RemoteIP != nil && *request.RemoteIP != "" {
 		query = query.Where("conversations.remote_ip like ?", "%"+*request.RemoteIP+"%")
 	}
+	return query
+}
+
+func (r *ConversationRepository) GetConversationList(ctx context.Context, request *domain.ConversationListReq) ([]*domain.ConversationListItem, uint64, error) {
+	conversations := []*domain.ConversationListItem{}
 	var count int64
-	if err := query.Count(&count).Error; err != nil {
+	if err := r.conversationListQuery(ctx, request).Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
-	if err := query.
+	if err := r.conversationListQuery(ctx, request).
 		Joins("left join apps on conversations.app_id = apps.id").
-		Select("conversations.*, apps.name as app_name, apps.type as app_type").
+		Select("conversations.*, apps.name as app_name, apps.type as app_type, "+
+			"(select count(*) from conversation_messages m where m.conversation_id = conversations.id and m.role = ?) as question_count", schema.User).
 		Offset(request.Offset()).
 		Limit(request.Limit()).
 		Order("conversations.created_at DESC").
@@ -67,6 +72,19 @@ func (r *ConversationRepository) GetConversationList(ctx context.Context, reques
 		return nil, 0, err
 	}
 	return conversations, uint64(count), nil
+}
+
+// GetConversationQuestionTotal 统计筛选条件下所有会话的用户提问总数
+func (r *ConversationRepository) GetConversationQuestionTotal(ctx context.Context, request *domain.ConversationListReq) (int64, error) {
+	var total int64
+	if err := r.db.WithContext(ctx).
+		Model(&domain.ConversationMessage{}).
+		Where("role = ?", schema.User).
+		Where("conversation_id IN (?)", r.conversationListQuery(ctx, request).Select("conversations.id")).
+		Count(&total).Error; err != nil {
+		return 0, err
+	}
+	return total, nil
 }
 
 func (r *ConversationRepository) GetConversationDetail(ctx context.Context, kbID, conversationID string) (*domain.ConversationDetailResp, error) {

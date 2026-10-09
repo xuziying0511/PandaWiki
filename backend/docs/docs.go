@@ -500,7 +500,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/v1.ConversationListItems"
+                                            "$ref": "#/definitions/domain.ConversationListResp"
                                         }
                                     }
                                 }
@@ -6292,11 +6292,33 @@ const docTemplate = `{
                 "ip_address": {
                     "$ref": "#/definitions/domain.IPAddress"
                 },
+                "question_count": {
+                    "description": "用户提问次数",
+                    "type": "integer"
+                },
                 "remote_ip": {
                     "type": "string"
                 },
                 "subject": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.ConversationListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.ConversationListItem"
+                    }
+                },
+                "question_total": {
+                    "description": "筛选条件下的用户提问总数",
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -9024,20 +9046,6 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/domain.CommentListItem"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "v1.ConversationListItems": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/domain.ConversationListItem"
                     }
                 },
                 "total": {

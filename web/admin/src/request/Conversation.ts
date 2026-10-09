@@ -16,7 +16,7 @@ import {
   DomainPWResponse,
   GetApiV1ConversationDetailParams,
   GetApiV1ConversationParams,
-  V1ConversationListItems,
+  DomainConversationListResp,
 } from "./types";
 
 /**
@@ -27,7 +27,7 @@ import {
  * @summary get conversation list
  * @request GET:/api/v1/conversation
  * @response `200` `(DomainPWResponse & {
-    data?: V1ConversationListItems,
+    data?: DomainConversationListResp,
 
 })` OK
  */
@@ -38,7 +38,7 @@ export const getApiV1Conversation = (
 ) =>
   httpRequest<
     DomainPWResponse & {
-      data?: V1ConversationListItems;
+      data?: DomainConversationListResp;
     }
   >({
     path: `/api/v1/conversation`,

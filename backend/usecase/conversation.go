@@ -46,10 +46,14 @@ func (u *ConversationUsecase) CreateChatConversationMessage(ctx context.Context,
 	return u.repo.CreateConversationMessage(ctx, conversation, references)
 }
 
-func (u *ConversationUsecase) GetConversationList(ctx context.Context, request *domain.ConversationListReq) (*domain.PaginatedResult[[]*domain.ConversationListItem], error) {
+func (u *ConversationUsecase) GetConversationList(ctx context.Context, request *domain.ConversationListReq) (*domain.ConversationListResp, error) {
 	conversations, total, err := u.repo.GetConversationList(ctx, request)
 	if err != nil {
 		return nil, err
+	}
+	questionTotal, err := u.repo.GetConversationQuestionTotal(ctx, request)
+	if err != nil {
+		return nil, fmt.Errorf("get conversation question total failed: %w", err)
 	}
 	// get feedback info
 	conversationIDs := make([]string, 0, len(conversations))
@@ -101,7 +105,11 @@ func (u *ConversationUsecase) GetConversationList(ctx context.Context, request *
 		}
 		return conversation
 	})
-	return domain.NewPaginatedResult(conversations, total), nil
+	return &domain.ConversationListResp{
+		Total:         total,
+		QuestionTotal: questionTotal,
+		Data:          conversations,
+	}, nil
 }
 
 func (u *ConversationUsecase) GetConversationDetail(ctx context.Context, kbID, conversationID string) (*domain.ConversationDetailResp, error) {
