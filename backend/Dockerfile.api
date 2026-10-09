@@ -2,6 +2,8 @@ FROM --platform=$BUILDPLATFORM golang:1.24.3-alpine AS builder
 
 WORKDIR /src
 ENV CGO_ENABLED=0
+ARG GOPROXY=https://goproxy.cn,direct
+ENV GOPROXY=$GOPROXY
 
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod \
