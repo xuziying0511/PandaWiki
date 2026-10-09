@@ -74,7 +74,6 @@ const WatermarkForm = ({
       title='水印'
       isEdit={watermarkIsEdit}
       onSubmit={handleSaveWatermark}
-      permission={BUSINESS_VERSION_PERMISSION}
     >
       <FormItem label='水印开关'>
         <Controller
@@ -167,11 +166,7 @@ const KeywordsForm = ({ kb }: { kb: DomainKnowledgeBaseDetail }) => {
 
   return (
     <SettingCardItem title='内容合规' isEdit={isEdit} onSubmit={onSubmit}>
-      <FormItem
-        vertical
-        permission={BUSINESS_VERSION_PERMISSION}
-        label='屏蔽 AI 问答中的关键字'
-      >
+      <FormItem vertical label='屏蔽 AI 问答中的关键字'>
         <Controller
           control={control}
           name='block_words'
@@ -260,7 +255,7 @@ const CopyForm = ({
       isEdit={isEdit}
       onSubmit={handleSaveWatermark}
     >
-      <FormItem label='限制复制' permission={BUSINESS_VERSION_PERMISSION}>
+      <FormItem label='限制复制'>
         <Controller
           control={control}
           name='copy_setting'
