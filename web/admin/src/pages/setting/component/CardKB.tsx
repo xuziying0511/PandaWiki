@@ -148,7 +148,6 @@ const ApiToken = () => {
   return (
     <SettingCardItem
       title='API Token'
-      permission={BUSINESS_VERSION_PERMISSION}
       extra={
         <Stack direction={'row'} alignItems={'center'}>
           <Button
