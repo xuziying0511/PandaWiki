@@ -128,9 +128,13 @@ func (u *LLMUsecase) BuildConversationMessageWithRAG(
 			}
 			u.logger.Debug("documents", log.String("documents", documents))
 
+			u.logger.Info("rag query rewritten", log.String("question", question), log.String("rewritten_query", rewrittenQuery))
+			// pass the user's original words to the model: the rewritten query is only for retrieval,
+			// and a wrong rewrite of a short follow-up (e.g. answering a clarifying question) would
+			// otherwise make the model answer a different question. History provides the context.
 			formattedMessages, err := template.Format(ctx, map[string]any{
 				"CurrentDate": time.Now().Format("2006-01-02"),
-				"Question":    rewrittenQuery,
+				"Question":    question,
 				"Documents":   documents,
 			})
 			if err != nil {
