@@ -114,7 +114,7 @@ func (u *LLMUsecase) BuildConversationMessageWithRAG(
 				DatasetID:           kb.DatasetID,
 				Question:            question,
 				GroupIDs:            groupIDs,
-				SimilarityThreshold: 0.2,
+				SimilarityThreshold: u.config.RAG.SimilarityThreshold,
 				HistoryMessages:     historyMessages[:len(historyMessages)-1],
 			})
 			if err != nil {
@@ -122,6 +122,10 @@ func (u *LLMUsecase) BuildConversationMessageWithRAG(
 				return nil, nil, errors.New("get rank nodes failed")
 			}
 			documents := domain.FormatNodeChunks(rankedNodes, kb.AccessSettings.BaseURL)
+			if len(rankedNodes) == 0 {
+				u.logger.Info("no documents retrieved for question", log.String("kb_id", kbID), log.String("question", rewrittenQuery))
+				documents = domain.NoDocumentsNotice
+			}
 			u.logger.Debug("documents", log.String("documents", documents))
 
 			formattedMessages, err := template.Format(ctx, map[string]any{

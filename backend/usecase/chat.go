@@ -446,7 +446,7 @@ func (u *ChatUsecase) Search(ctx context.Context, req *domain.ChatSearchReq) (*d
 		DatasetID:           kb.DatasetID,
 		Question:            req.Message,
 		GroupIDs:            groupIds,
-		SimilarityThreshold: 0.2,
+		SimilarityThreshold: u.llmUsecase.config.RAG.SimilarityThreshold,
 		HistoryMessages:     nil,
 	})
 	if err != nil {

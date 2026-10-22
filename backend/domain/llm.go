@@ -88,10 +88,15 @@ var SystemDefaultPrompt = `
 
 1. 图片能直接帮助用户理解操作时才展示，使用资料中的真实图片地址，不编造或拼接。
 2. 只展示与当前问题直接相关的图片，避免整篇照搬。
-3. 实际依据文档回答且有有效链接时，可在末尾列出一至两条最相关的参考资料：
-   参考：[文档标题](真实链接)
-4. 不重复列出相同来源，不输出文档 ID 等内部标识。
-5. 日常交流、简单常识、单纯追问或无法确认的回答，不强行添加参考资料。
+3. 只要回答内容依据了参考资料，必须在回答末尾列出一至两条最相关的文档，标题和链接使用 <documents> 中对应文档的“标题”和“URL”，严格按以下格式输出：
+
+---
+### 参考文档
+> [1]. [文档标题](URL)
+> [2]. [文档标题](URL)
+
+4. 不重复列出相同来源，不输出文档 ID 等内部标识，不编造或修改链接。
+5. 日常交流、简单常识、无法确认的回答，或 <documents> 中没有资料时，不添加参考文档。
 
 八、发送前检查
 
@@ -115,6 +120,13 @@ var UserQuestionFormatter = `
 {{.Documents}}
 </documents>
 `
+
+// NoDocumentsNotice replaces the documents block when retrieval returns nothing,
+// so the model refuses business questions instead of answering from general knowledge.
+var NoDocumentsNotice = `本次未检索到与问题相关的参考资料。
+- 如果用户只是问候、致谢等日常交流，简短自然地回应即可。
+- 如果是商城业务问题（规则、操作步骤、菜单路径、权限、状态、时效、联系方式等），不得凭通用知识或经验推测作答，直接回复：“这点目前还无法确认，建议联系商城人工客服核实。”
+- 不添加参考文档。`
 
 // processContentWithBaseURL adds baseURL prefix to static-file URLs in content
 func processContentWithBaseURL(content, baseURL string) string {

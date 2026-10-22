@@ -49,6 +49,8 @@ type NATSConfig struct {
 type RAGConfig struct {
 	Provider string      `mapstructure:"provider"`
 	CTRAG    CTRAGConfig `mapstructure:"ct_rag"`
+	// SimilarityThreshold filters retrieved chunks for chat/search, range 0-1
+	SimilarityThreshold float64 `mapstructure:"similarity_threshold"`
 }
 
 type CTRAGConfig struct {
@@ -112,6 +114,7 @@ func NewConfig() (*Config, error) {
 				BaseURL: fmt.Sprintf("http://%s.18:5050", SUBNET_PREFIX),
 				APIKey:  "sk-1234567890",
 			},
+			SimilarityThreshold: 0.2,
 		},
 		Redis: RedisConfig{
 			Addr:     "panda-wiki-redis:6379",
@@ -192,6 +195,11 @@ func overrideWithEnv(c *Config) {
 	// rag
 	if env := os.Getenv("RAG_CT_RAG_BASE_URL"); env != "" {
 		c.RAG.CTRAG.BaseURL = env
+	}
+	if env := os.Getenv("RAG_SIMILARITY_THRESHOLD"); env != "" {
+		if v, err := strconv.ParseFloat(env, 64); err == nil && v >= 0 && v <= 1 {
+			c.RAG.SimilarityThreshold = v
+		}
 	}
 	// redis
 	if env := os.Getenv("REDIS_ADDR"); env != "" {
