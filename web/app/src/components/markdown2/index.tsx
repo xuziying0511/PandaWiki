@@ -3,7 +3,7 @@
 import { useSmartScroll } from '@/hooks';
 import { copyText } from '@/utils';
 import { getImagePath } from '@/utils/getImagePath';
-import { Box, Dialog, alpha, useTheme } from '@mui/material';
+import { Box, Dialog, useTheme } from '@mui/material';
 import mk from '@vscode/markdown-it-katex';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/an-old-hope.css';
@@ -19,7 +19,6 @@ import React, {
 import { clearImageBlobCache, createImageRenderer } from './imageRenderer';
 import { incrementalRender } from './incrementalRenderer';
 import { createMermaidRenderer } from './mermaidRenderer';
-import { createOptionsRenderer } from './optionsRenderer';
 import {
   processThinkingContent,
   useThinkingRenderer,
@@ -30,8 +29,6 @@ interface MarkDown2Props {
   loading?: boolean;
   content: string;
   autoScroll?: boolean;
-  /** 选择 ```options 选项后的回调；不传时选项卡片为只读 */
-  onOptionSelect?: (value: string) => void;
 }
 
 // ==================== 工具函数 ====================
@@ -75,7 +72,6 @@ const MarkDown2: React.FC<MarkDown2Props> = ({
   loading = false,
   content,
   autoScroll = true,
-  onOptionSelect,
 }) => {
   const theme = useTheme();
   const themeMode = theme.palette.mode;
@@ -92,8 +88,6 @@ const MarkDown2: React.FC<MarkDown2Props> = ({
   const mermaidSuccessIdRef = useRef<Map<number, string>>(new Map());
   const imageRenderCacheRef = useRef<Map<number, string>>(new Map()); // 图片渲染缓存（HTML）
   const imageBlobCacheRef = useRef<Map<string, string>>(new Map()); // 图片 blob URL 缓存
-  const onOptionSelectRef = useRef(onOptionSelect);
-  onOptionSelectRef.current = onOptionSelect;
 
   // 使用智能滚动 hook
   const { scrollToBottom } = useSmartScroll({
@@ -160,8 +154,6 @@ const MarkDown2: React.FC<MarkDown2Props> = ({
       let imageCount = 0;
       let htmlImageCount = 0; // HTML 标签图片计数
       let mermaidCount = 0;
-      let optionsCount = 0;
-      const renderOptions = createOptionsRenderer(md);
       md.renderer.rules.image = (tokens, idx) => {
         imageCount++;
         const token = tokens[idx];
@@ -187,11 +179,6 @@ const MarkDown2: React.FC<MarkDown2Props> = ({
         if (info === 'mermaid') {
           mermaidCount++;
           return renderMermaid(code, mermaidCount);
-        }
-
-        if (info === 'options') {
-          optionsCount++;
-          return renderOptions(code, optionsCount);
         }
 
         const defaultRender = originalFenceRender || md.renderer.rules.fence;
@@ -443,25 +430,6 @@ const MarkDown2: React.FC<MarkDown2Props> = ({
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
 
-      // 检查是否点击了选项卡片的确认按钮
-      const submitButton = target.closest(
-        '.chat-options-submit',
-      ) as HTMLButtonElement | null;
-      if (submitButton) {
-        const block = submitButton.closest('.chat-options');
-        const checked = block?.querySelector(
-          'input[type="radio"]:checked',
-        ) as HTMLInputElement | null;
-        if (block && checked && onOptionSelectRef.current) {
-          block
-            .querySelectorAll('input, button')
-            .forEach(el => ((el as HTMLInputElement).disabled = true));
-          block.classList.add('answered');
-          onOptionSelectRef.current(checked.value);
-        }
-        return;
-      }
-
       // 检查是否点击了图片
       const imgElement = target.closest(
         'img.markdown-image',
@@ -495,23 +463,11 @@ const MarkDown2: React.FC<MarkDown2Props> = ({
       }
     };
 
-    // 选中选项后启用确认按钮
-    const handleChange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      if (target.type !== 'radio') return;
-      const submitButton = target
-        .closest('.chat-options')
-        ?.querySelector('.chat-options-submit') as HTMLButtonElement | null;
-      if (submitButton) submitButton.disabled = false;
-    };
-
     container.addEventListener('click', handleClick);
-    container.addEventListener('change', handleChange);
 
     return () => {
       clearImageBlobCache(imageBlobCacheRef.current);
       container.removeEventListener('click', handleClick);
-      container.removeEventListener('change', handleChange);
     };
   }, []);
 
@@ -552,58 +508,6 @@ const MarkDown2: React.FC<MarkDown2Props> = ({
       padding: '20px',
       color: 'text.secondary',
       fontSize: '14px',
-    },
-
-    // 选项卡片样式
-    '.chat-options': {
-      mt: 2,
-      p: 2,
-      border: '1px solid',
-      borderColor: alpha(theme.palette.text.primary, 0.1),
-      borderRadius: '12px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 1,
-    },
-    '.chat-options-question': {
-      fontWeight: 600,
-      mb: 0.5,
-    },
-    '.chat-options-item': {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 1,
-      cursor: 'pointer',
-      input: {
-        width: 16,
-        height: 16,
-        m: 0,
-        accentColor: theme.palette.primary.main,
-        cursor: 'inherit',
-      },
-    },
-    '.chat-options-submit': {
-      mt: 1,
-      py: 1,
-      border: 'none',
-      borderRadius: '8px',
-      fontSize: '14px',
-      cursor: 'pointer',
-      color: theme.palette.primary.contrastText,
-      bgcolor: 'primary.main',
-      '&:disabled': {
-        cursor: 'not-allowed',
-        opacity: 0.4,
-      },
-    },
-    '.chat-options.answered .chat-options-submit': {
-      display: 'none',
-    },
-    // 未开放交互时（历史消息、生成中）选项只读
-    '&.options-readonly': {
-      '.chat-options-item': { cursor: 'default', opacity: 0.7 },
-      '.chat-options-item input': { pointerEvents: 'none' },
-      '.chat-options-submit': { display: 'none' },
     },
 
     // LaTeX 样式
@@ -658,7 +562,7 @@ const MarkDown2: React.FC<MarkDown2Props> = ({
         />
       </Dialog>
       <Box
-        className={`markdown-body ${themeMode === 'dark' ? 'md-dark' : ''} ${onOptionSelect ? '' : 'options-readonly'}`}
+        className={`markdown-body ${themeMode === 'dark' ? 'md-dark' : ''}`}
         sx={componentStyles}
       >
         <div ref={containerRef} />
