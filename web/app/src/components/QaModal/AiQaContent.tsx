@@ -990,7 +990,15 @@ const AiQaContent: React.FC<{
 
                 {/* AI回答内容 */}
                 <StyledAiBubbleContent>
-                  <MarkDown2 content={item.a} autoScroll={false} />
+                  <MarkDown2
+                    content={item.a}
+                    autoScroll={false}
+                    onOptionSelect={
+                      index === conversation.length - 1 && !loading
+                        ? value => onSearch(value)
+                        : undefined
+                    }
+                  />
                 </StyledAiBubbleContent>
 
                 {/* 操作按钮 */}
