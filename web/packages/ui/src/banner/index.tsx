@@ -20,6 +20,11 @@ const StyledBanner = styled('div')(({ theme }) => ({
   backgroundPosition: '0 0',
   backgroundRepeat: 'repeat',
   marginTop: theme.spacing(-10),
+  // 首页容器为纵向 flex，撑满页眉与页脚之间的剩余高度，避免底部露出白底
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
 }));
 
 const StyledTitle = styled('h1')(({ theme }) => ({

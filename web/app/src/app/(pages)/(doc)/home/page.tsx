@@ -1,7 +1,6 @@
 'use client';
 import { useMemo, useState, useEffect } from 'react';
 import Home from '@/views/home';
-import { WelcomeFooter } from '@/components/footer';
 import { ThemeProvider } from '@ctzhian/ui';
 import { WelcomeHeader } from '@/components/header';
 import { Stack, createTheme } from '@mui/material';
@@ -69,13 +68,12 @@ const HomePage = () => {
     <ThemeProvider theme={theme}>
       <Stack
         justifyContent='space-between'
-        sx={{ minHeight: '100vh', bgcolor: 'background.default' }}
+        sx={{ minHeight: '100dvh', bgcolor: 'background.default' }}
       >
         <WelcomeHeader showSearch={showSearch} />
         <Stack sx={{ flex: 1 }}>
           <Home />
         </Stack>
-        <WelcomeFooter />
       </Stack>
     </ThemeProvider>
   );
