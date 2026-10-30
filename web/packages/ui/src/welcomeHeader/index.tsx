@@ -128,7 +128,7 @@ const Header = React.memo(
           top: 0,
           left: 0,
           right: 0,
-          height: 64,
+          height: 80,
           flexShrink: 0,
           backgroundColor: isAtTop
             ? 'transparent'
@@ -185,7 +185,7 @@ const Header = React.memo(
                 <img
                   src={logo}
                   alt='logo'
-                  height={36}
+                  height={mobile ? 48 : 56}
                   style={{
                     flexShrink: mobile ? 1 : 0,
                     maxWidth: mobile ? '100%' : 'none',

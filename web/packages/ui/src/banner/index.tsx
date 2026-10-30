@@ -20,11 +20,11 @@ const StyledBanner = styled('div')(({ theme }) => ({
   backgroundPosition: '0 0',
   backgroundRepeat: 'repeat',
   marginTop: theme.spacing(-10),
-  // 首页容器为纵向 flex，撑满页眉与页脚之间的剩余高度，避免底部露出白底
+  // 撑满首页剩余高度，内容从上方排布，避免高屏幕下整体偏下。
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'center',
+  justifyContent: 'flex-start',
 }));
 
 const StyledTitle = styled('h1')(({ theme }) => ({
@@ -343,8 +343,8 @@ const Banner = React.memo(
           sx={{
             alignItems: 'flex-start',
             gap: 0,
-            py: { xs: 8, md: '200px' },
-            pt: { xs: 16 },
+            pt: 'clamp(160px, 22dvh, 260px)',
+            pb: { xs: 8, md: 12 },
           }}
         >
           <StyledTitle ref={titleRef}>{title.text}</StyledTitle>

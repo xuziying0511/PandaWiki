@@ -19,10 +19,10 @@ const HomePage = () => {
       const elements = document.querySelectorAll('.banner-search-box');
       if (elements.length > 0) {
         // 判断是否还有任意一个搜索框处于可视区域内
-        // 顶部预留 64px 为头部占用区域
+        // 顶部预留 80px 为头部占用区域
         const hasVisibleBox = Array.from(elements).some(el => {
           const rect = el.getBoundingClientRect();
-          return rect.bottom > 64 && rect.top < window.innerHeight;
+          return rect.bottom > 80 && rect.top < window.innerHeight;
         });
         setShowSearch(!hasVisibleBox);
       } else {
