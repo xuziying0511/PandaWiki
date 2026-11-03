@@ -1,6 +1,10 @@
 'use client';
 import { useMemo, useState, useEffect } from 'react';
 import Home from '@/views/home';
+import HomeChat from '@/views/home/HomeChat';
+import { useBasePath } from '@/hooks';
+import { getImagePath } from '@/utils/getImagePath';
+import { useSearchParams } from 'next/navigation';
 import { ThemeProvider } from '@ctzhian/ui';
 import { WelcomeHeader } from '@/components/header';
 import { Stack, createTheme } from '@mui/material';
@@ -10,9 +14,33 @@ import { THEME_TO_PALETTE } from '@panda-wiki/themes/constants';
 
 const HomePage = () => {
   const { kbDetail } = useStore();
+  const basePath = useBasePath();
+  const searchParams = useSearchParams();
   const [showSearch, setShowSearch] = useState(false);
+  // 对话中：隐藏首页模块，原地展示对话视图；带 cid/ask 参数进入时直接打开
+  const [chatting, setChatting] = useState(
+    () => !!(searchParams.get('cid') || searchParams.get('ask')),
+  );
+
+  const startChat = () => {
+    window.scrollTo({ top: 0 });
+    setChatting(true);
+  };
+
+  // 对话视图沿用横幅壁纸，保证背景不变
+  const bannerBgUrl = useMemo(() => {
+    const bannerConfig = kbDetail?.settings?.web_app_landing_configs?.find(
+      item => item.type === 'banner',
+    );
+    const url = bannerConfig?.banner_config?.bg_url;
+    return url ? getImagePath(url, basePath) : '';
+  }, [kbDetail, basePath]);
 
   useEffect(() => {
+    if (chatting) {
+      setShowSearch(false);
+      return;
+    }
     let ticking = false;
 
     const checkVisibility = () => {
@@ -44,7 +72,7 @@ const HomePage = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [chatting]);
 
   const theme = useMemo(() => {
     // @ts-ignore
@@ -68,11 +96,28 @@ const HomePage = () => {
     <ThemeProvider theme={theme}>
       <Stack
         justifyContent='space-between'
-        sx={{ minHeight: '100dvh', bgcolor: 'background.default' }}
+        sx={{
+          minHeight: '100dvh',
+          bgcolor: 'background.default',
+          ...(chatting && {
+            height: '100dvh',
+            overflow: 'hidden',
+            ...(bannerBgUrl && {
+              backgroundImage: `url(${bannerBgUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }),
+          }),
+        }}
       >
-        <WelcomeHeader showSearch={showSearch} />
-        <Stack sx={{ flex: 1 }}>
-          <Home />
+        <WelcomeHeader showSearch={showSearch} onChat={startChat} />
+        <Stack sx={{ flex: 1, minHeight: 0 }}>
+          {chatting ? (
+            <HomeChat onBack={() => setChatting(false)} />
+          ) : (
+            <Home onChat={startChat} />
+          )}
         </Stack>
       </Stack>
     </ThemeProvider>

@@ -219,7 +219,12 @@ const componentMap = {
   question: dynamic(() => import('@panda-wiki/ui').then(mod => mod.Question)),
 } as const;
 
-const Welcome = () => {
+interface WelcomeProps {
+  /** 提供时，提问后由首页切换为对话视图，而不是打开问答弹窗 */
+  onChat?: () => void;
+}
+
+const Welcome = ({ onChat }: WelcomeProps) => {
   const basePath = useBasePath();
   const { mobile = false, kbDetail, setQaModalOpen } = useStore();
   const settings = kbDetail?.settings;
@@ -230,7 +235,11 @@ const Welcome = () => {
     if (searchText.trim()) {
       if (type === 'chat') {
         sessionStorage.setItem('chat_search_query', searchText.trim());
-        setQaModalOpen?.(true);
+        if (onChat) {
+          onChat();
+        } else {
+          setQaModalOpen?.(true);
+        }
       } else {
         sessionStorage.setItem('chat_search_query', searchText.trim());
       }

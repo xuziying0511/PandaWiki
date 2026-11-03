@@ -124,8 +124,11 @@ const Header = ({ isDocPage = false, isWelcomePage = false }: HeaderProps) => {
 
 export const WelcomeHeader = ({
   showSearch = true,
+  onChat,
 }: {
   showSearch?: boolean;
+  /** 提供时，问答入口切换为首页对话视图，不再使用弹窗 */
+  onChat?: () => void;
 }) => {
   const basePath = useBasePath();
   const {
@@ -139,10 +142,21 @@ export const WelcomeHeader = ({
     if (value?.trim()) {
       if (type === 'chat') {
         sessionStorage.setItem('chat_search_query', value.trim());
-        setQaModalOpen?.(true);
+        if (onChat) {
+          onChat();
+        } else {
+          setQaModalOpen?.(true);
+        }
       } else {
         sessionStorage.setItem('chat_search_query', value.trim());
       }
+    }
+  };
+  const handleQaClick = () => {
+    if (onChat) {
+      onChat();
+    } else {
+      setQaModalOpen?.(true);
     }
   };
   return (
@@ -166,14 +180,14 @@ export const WelcomeHeader = ({
         })) || []
       }
       onSearch={handleSearch}
-      onQaClick={() => setQaModalOpen?.(true)}
+      onQaClick={handleQaClick}
     >
       {!!authInfo && (
         <Box sx={{ ml: 2 }}>
           <LogoutButton />
         </Box>
       )}
-      <QaModal />
+      {!onChat && <QaModal />}
     </WelcomeHeaderComponent>
   );
 };

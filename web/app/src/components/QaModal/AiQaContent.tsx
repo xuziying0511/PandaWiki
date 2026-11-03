@@ -127,7 +127,9 @@ const AiQaContent: React.FC<{
   hotSearch: string[];
   placeholder: string;
   inputRef: React.RefObject<HTMLInputElement | null>;
-}> = ({ hotSearch, placeholder, inputRef }) => {
+  /** 整页模式：对话区撑满父容器并滚动，输入框固定在底部 */
+  fullPage?: boolean;
+}> = ({ hotSearch, placeholder, inputRef, fullPage = false }) => {
   const sseClientRef = useRef<SSEClient<{
     type: string;
     content: string;
@@ -733,7 +735,8 @@ const AiQaContent: React.FC<{
   }, []);
 
   useEffect(() => {
-    if (!qaModalOpen) {
+    // 整页模式不依赖弹窗开关，图片地址在卸载时由 onReset 统一清理
+    if (!fullPage && !qaModalOpen) {
       conversation.forEach(item => {
         item.image_paths.forEach(image => {
           if (image.startsWith('blob:')) {
@@ -742,10 +745,22 @@ const AiQaContent: React.FC<{
         });
       });
     }
-  }, [qaModalOpen, conversation]);
+  }, [fullPage, qaModalOpen, conversation]);
 
   return (
-    <StyledMainContainer className={palette.mode === 'dark' ? 'md-dark' : ''}>
+    <StyledMainContainer
+      className={palette.mode === 'dark' ? 'md-dark' : ''}
+      sx={
+        fullPage
+          ? {
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+              height: '100%',
+            }
+          : undefined
+      }
+    >
       {/* 无对话时显示欢迎界面 */}
       {conversation.length === 0 && (
         <Box
@@ -847,6 +862,7 @@ const AiQaContent: React.FC<{
         sx={{
           mb: conversation?.length > 0 ? 2 : 0,
           display: conversation.length > 0 ? 'flex' : 'none',
+          ...(fullPage && { flex: 1, minHeight: 0, maxHeight: 'none' }),
         }}
       >
         <Stack gap={2}>
