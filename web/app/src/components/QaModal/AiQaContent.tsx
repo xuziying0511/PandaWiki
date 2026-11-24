@@ -67,7 +67,7 @@ import {
   StyledUserBubble,
 } from './StyledComponents';
 import { handleThinkingContent } from './utils';
-import { openUdesk, shouldOfferHumanSupport } from './udesk';
+import { UDESK_LINK, openUdesk, shouldOfferHumanSupport } from './udesk';
 
 import { getImagePath } from '@/utils/getImagePath';
 
@@ -141,6 +141,8 @@ const AiQaContent: React.FC<{
   const lastResultExpendRef = useRef(false);
   const [fullAnswer, setFullAnswer] = useState<string>('');
   const [conversation, setConversation] = useState<ConversationItem[]>([]);
+  const [openingUdesk, setOpeningUdesk] = useState(false);
+  const [udeskFallback, setUdeskFallback] = useState(false);
   const [loading, setLoading] = useState(false);
   const [thinking, setThinking] = useState<keyof typeof AnswerStatus>(4);
   const [nonce, setNonce] = useState('');
@@ -1010,20 +1012,39 @@ const AiQaContent: React.FC<{
                   <MarkDown2 content={item.a} autoScroll={false} />
                 </StyledAiBubbleContent>
 
-                {shouldOfferHumanSupport(item.q, item.a, item.score) && (
-                  <Button
-                    size='small'
-                    variant='outlined'
-                    sx={{ alignSelf: 'flex-start', mt: 1 }}
-                    onClick={() => {
-                      openUdesk().catch(() =>
-                        message.error('暂时无法打开人工客服，请稍后重试'),
-                      );
-                    }}
-                  >
-                    转人工
-                  </Button>
-                )}
+                {shouldOfferHumanSupport(item.q, item.a, item.score) &&
+                  (udeskFallback ? (
+                    <Button
+                      href={UDESK_LINK}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      size='small'
+                      variant='outlined'
+                      sx={{ alignSelf: 'flex-start', mt: 1 }}
+                    >
+                      在新标签页打开人工客服
+                    </Button>
+                  ) : (
+                    <Button
+                      size='small'
+                      variant='outlined'
+                      sx={{ alignSelf: 'flex-start', mt: 1 }}
+                      disabled={openingUdesk}
+                      onClick={async () => {
+                        setOpeningUdesk(true);
+                        try {
+                          await openUdesk();
+                        } catch {
+                          setUdeskFallback(true);
+                          message.error('客服面板未打开，请使用下方链接');
+                        } finally {
+                          setOpeningUdesk(false);
+                        }
+                      }}
+                    >
+                      {openingUdesk ? '正在打开客服…' : '转人工'}
+                    </Button>
+                  ))}
 
                 {/* 操作按钮 */}
                 {(index !== conversation.length - 1 || !loading) && (

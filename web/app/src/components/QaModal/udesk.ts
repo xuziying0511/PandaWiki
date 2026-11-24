@@ -1,13 +1,25 @@
 const UDESK_CODE = '2476e31b';
-const UDESK_LINK = 'https://1500735.s4.udesk.cn/im_client/?web_plugin_id=60650';
+export const UDESK_LINK =
+  'https://1500735.s4.udesk.cn/im_client/?web_plugin_id=60650';
 const UDESK_SCRIPT = 'https://assets-cli.s4.udesk.cn/im_client/js/udeskApi.js';
 
 type UdeskArgs =
   | ['showPanel']
-  | [{ code: string; link: string; targetSelector: string }];
+  | [
+      {
+        code: string;
+        link: string;
+        targetSelector: string;
+        panel: { onToggle: (data: { visible: boolean }) => void };
+      },
+    ];
 type Udesk = ((...args: UdeskArgs) => void) & { d?: UdeskArgs[] };
 type UdeskWindow = Window & { UdeskApiObject?: string; ud?: Udesk };
 let udeskReady: Promise<Udesk> | undefined;
+let panelVisible = false;
+let onPanelOpened: (() => void) | undefined;
+let opening: Promise<void> | undefined;
+
 export const shouldOfferHumanSupport = (
   question: string,
   answer: string,
@@ -16,6 +28,7 @@ export const shouldOfferHumanSupport = (
   const intent = question.trim().replace(/[。！？!?]+$/u, '');
   return (
     score === -1 ||
+    score === 4 ||
     /^(?:请|帮我|我要|我想|请帮我)?(?:转接?|找|联系)?(?:人工(?:客服|坐席)?|客服)(?:吧|吗|可以吗)?$/u.test(
       intent,
     ) ||
@@ -25,7 +38,7 @@ export const shouldOfferHumanSupport = (
     )
   );
 };
-export const openUdesk = async () => {
+const loadUdesk = () => {
   const browser = window as UdeskWindow;
   if (!udeskReady) {
     udeskReady = new Promise<Udesk>((resolve, reject) => {
@@ -38,7 +51,7 @@ export const openUdesk = async () => {
       }
       browser.UdeskApiObject = 'ud';
       if (browser.ud) {
-        resolve(browser.ud);
+        reject(new Error('Udesk is already initialized elsewhere'));
         return;
       }
       const queued: Udesk = (...args) => {
@@ -49,15 +62,27 @@ export const openUdesk = async () => {
         code: UDESK_CODE,
         link: UDESK_LINK,
         targetSelector: '#' + targetId,
+        panel: {
+          onToggle: ({ visible }) => {
+            panelVisible = visible;
+            if (visible) onPanelOpened?.();
+          },
+        },
       });
       const script = document.createElement('script');
       script.async = true;
       script.src = UDESK_SCRIPT;
-      script.onload = () => resolve(browser.ud ?? queued);
-      script.onerror = () => {
+      const fail = () => {
+        window.clearTimeout(timeout);
         if (browser.ud === queued) delete browser.ud;
         script.remove();
         reject(new Error('Udesk script failed to load'));
+      };
+      const timeout = window.setTimeout(fail, 5000);
+      script.onerror = fail;
+      script.onload = () => {
+        window.clearTimeout(timeout);
+        resolve(browser.ud ?? queued);
       };
       document.head.appendChild(script);
     }).catch(error => {
@@ -65,6 +90,34 @@ export const openUdesk = async () => {
       throw error;
     });
   }
-  const ud = await udeskReady;
-  ud('showPanel');
+  return udeskReady;
+};
+
+export const openUdesk = () => {
+  if (!opening) {
+    opening = loadUdesk()
+      .then(ud => {
+        if (panelVisible) return;
+        return new Promise<void>((resolve, reject) => {
+          const timeout = window.setTimeout(() => {
+            reject(new Error('Udesk panel did not open'));
+          }, 2500);
+          onPanelOpened = () => {
+            window.clearTimeout(timeout);
+            resolve();
+          };
+          try {
+            ud('showPanel');
+          } catch (error) {
+            window.clearTimeout(timeout);
+            reject(error);
+          }
+        });
+      })
+      .finally(() => {
+        onPanelOpened = undefined;
+        opening = undefined;
+      });
+  }
+  return opening;
 };
