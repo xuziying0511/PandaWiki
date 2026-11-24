@@ -67,6 +67,7 @@ import {
   StyledUserBubble,
 } from './StyledComponents';
 import { handleThinkingContent } from './utils';
+import { openUdesk, shouldOfferHumanSupport } from './udesk';
 
 import { getImagePath } from '@/utils/getImagePath';
 
@@ -1008,6 +1009,21 @@ const AiQaContent: React.FC<{
                 <StyledAiBubbleContent>
                   <MarkDown2 content={item.a} autoScroll={false} />
                 </StyledAiBubbleContent>
+
+                {shouldOfferHumanSupport(item.q, item.a, item.score) && (
+                  <Button
+                    size='small'
+                    variant='outlined'
+                    sx={{ alignSelf: 'flex-start', mt: 1 }}
+                    onClick={() => {
+                      openUdesk().catch(() =>
+                        message.error('暂时无法打开人工客服，请稍后重试'),
+                      );
+                    }}
+                  >
+                    转人工
+                  </Button>
+                )}
 
                 {/* 操作按钮 */}
                 {(index !== conversation.length - 1 || !loading) && (
