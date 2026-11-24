@@ -89,7 +89,7 @@ func (r *PromptRepo) buildPresetPrompt(prompt domain.Prompt) string {
 		steps = append(steps, `若文档不足以回答用户问题，请直接回答"抱歉，我当前的知识不足以回答这个问题"`)
 	}
 
-	steps = append(steps, "如果文档中有相关图片或附件，请在回答中输出相关图片或附件")
+	steps = append(steps, "如果文档中有相关附件，请在回答中输出相关附件")
 
 	if prompt.EnablePresetReference {
 		steps = append(steps, `如果回答的内容引用了文档，请使用内联引用格式标注回答内容的来源：
@@ -106,7 +106,7 @@ func (r *PromptRepo) buildPresetPrompt(prompt domain.Prompt) string {
 	> [N]. [文档标题N](URLN)
 	---`)
 	} else {
-		steps = append(steps, "回答时不得在内容中标注任何文档来源、引用序号或参考链接，直接给出完整回答即可")
+		steps = append(steps, "回答时直接给出完整回答，不标注文档来源、引用序号或文档链接")
 	}
 
 	var stepLines []string

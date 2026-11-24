@@ -102,7 +102,7 @@ func (u *LLMUsecase) BuildConversationMessageWithRAG(
 			}
 
 			template := prompt.FromMessages(schema.GoTemplate,
-				schema.SystemMessage(systemPrompt),
+				schema.SystemMessage(systemPrompt+"\n\n"+domain.AnswerImageInstructions),
 				schema.UserMessage(domain.UserQuestionFormatter),
 			)
 			kb, err := u.kbRepo.GetKnowledgeBaseByID(ctx, kbID)
