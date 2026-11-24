@@ -191,6 +191,7 @@ type NodeContentChunk struct {
 }
 
 type RankedNodeChunks struct {
+	SourceContent string `json:"-"`
 	NodeID        string
 	NodeName      string
 	NodeSummary   string

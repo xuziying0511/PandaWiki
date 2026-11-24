@@ -263,9 +263,16 @@ func (u *ChatUsecase) Chat(ctx context.Context, req *domain.ChatRequest) (<-chan
 
 		chatErr := u.llmUsecase.ChatWithAgent(ctx, chatModel, messages, &usage, onChunkAC)
 
-		// 处理缓冲区中剩余的内容
 		if flushBuffer != nil {
 			flushBuffer(ctx, "data")
+		}
+		if chatErr == nil {
+			if images := citedAnswerImages(answer, rankedNodes); images != "" {
+				chatErr = onChunkAC(ctx, "data", images)
+				if flushBuffer != nil {
+					flushBuffer(ctx, "data")
+				}
+			}
 		}
 
 		// save assistant answer to conversation message
@@ -418,6 +425,7 @@ func (u *ChatUsecase) CreateAcOnChunk(ctx context.Context, kbID string, answer *
 		bufferRunes := []rune(buffer.String())
 		if len(bufferRunes) > 0 {
 			fullContent := buffer.String()
+			buffer.Reset()
 			processedContent := u.replaceWithSimpleString(fullContent, filter.DFA)
 			*answer += processedContent
 			eventCh <- domain.SSEEvent{Type: dataType, Content: processedContent}

@@ -502,6 +502,7 @@ func (u *LLMUsecase) GetRankNodes(ctx context.Context, req GetRankNodesRequest) 
 			if nodeChunk, ok := rankedNodesMap[record.DocID]; !ok {
 				if docNode, ok := docIDNode[record.DocID]; ok {
 					rankNodeChunk := &domain.RankedNodeChunks{
+						SourceContent: docNode.Content,
 						NodeID:        docNode.NodeID,
 						NodeName:      docNode.Name,
 						NodeSummary:   docNode.Meta.Summary,
