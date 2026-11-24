@@ -15,7 +15,6 @@ import { message } from '@ctzhian/ui';
 
 const ratings = [
   { score: 3, label: '已解决' },
-  { score: 2, label: '部分解决' },
   { score: 4, label: '未解决' },
 ] as const;
 
@@ -83,19 +82,27 @@ export default function AnswerEvaluation({
 
   return (
     <>
-      <Stack spacing={0.5}>
+      <Stack
+        direction='row'
+        alignItems='center'
+        justifyContent='space-between'
+        flexWrap='wrap'
+        gap={1.5}
+        sx={{ width: '100%', pt: 1.5, borderTop: 1, borderColor: 'divider' }}
+      >
         <Typography variant='caption' color='text.secondary' aria-live='polite'>
           {selected
             ? `已评价：${selected.label}，感谢反馈`
             : rated
               ? '此前已提交评价，感谢反馈'
-              : '这条回答是否解决了你的问题？'}
+              : '这条回答解决了你的问题吗？'}
         </Typography>
-        <Stack direction='row' gap={1} flexWrap='wrap'>
+        <Stack direction='row' gap={1} flexWrap='wrap' sx={{ ml: 'auto' }}>
           {ratings.map(rating => (
             <Button
               key={rating.score}
               size='small'
+              sx={{ width: 94, maxWidth: '100%', minHeight: 38 }}
               variant={score === rating.score ? 'contained' : 'outlined'}
               aria-pressed={score === rating.score}
               disabled={rated || submitting || !messageId}
@@ -116,9 +123,7 @@ export default function AnswerEvaluation({
         maxWidth='xs'
         aria-labelledby={titleId}
       >
-        <DialogTitle id={titleId}>
-          {pendingScore === 2 ? '部分解决' : '未解决'}：补充原因（选填）
-        </DialogTitle>
+        <DialogTitle id={titleId}>未解决：补充原因（选填）</DialogTitle>
         <DialogContent>
           <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
             可以选择一项原因，或直接提交评价。
