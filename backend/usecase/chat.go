@@ -266,14 +266,6 @@ func (u *ChatUsecase) Chat(ctx context.Context, req *domain.ChatRequest) (<-chan
 		if flushBuffer != nil {
 			flushBuffer(ctx, "data")
 		}
-		if chatErr == nil {
-			if images := citedAnswerImages(answer, rankedNodes); images != "" {
-				chatErr = onChunkAC(ctx, "data", images)
-				if flushBuffer != nil {
-					flushBuffer(ctx, "data")
-				}
-			}
-		}
 
 		// save assistant answer to conversation message
 

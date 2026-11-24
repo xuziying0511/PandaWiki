@@ -141,7 +141,7 @@ func (u *ConversationUsecase) GetConversationDetail(ctx context.Context, kbID, c
 }
 
 func extractReferencesBlock(conversationID, appID, text string) []*domain.ConversationReference {
-	text, _, _ = strings.Cut(text, answerImagesHeading)
+	text, _, _ = strings.Cut(text, "\n\n### 相关图片\n\n")
 	text = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(text), "\n---"))
 	// match whole reference block
 	reBlock := regexp.MustCompile(`(?ms)((?:>|\\u003e)\s*\[\d+\]\.\s*\[.*?\]\(.*?\)\s*\n?)+$`)
