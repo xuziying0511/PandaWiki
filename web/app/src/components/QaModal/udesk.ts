@@ -20,19 +20,23 @@ let panelVisible = false;
 let onPanelOpened: (() => void) | undefined;
 let opening: Promise<void> | undefined;
 
+export const requestsHumanSupport = (question: string) =>
+  /^(?:请|帮我|我要|我想|请帮我)?(?:转接?|找|联系)?(?:人工(?:客服|坐席)?|客服)(?:吧|吗|可以吗)?$/u.test(
+    question.trim().replace(/[。！？!?]+$/u, ''),
+  );
+
 export const shouldOfferHumanSupport = (
   question: string,
   answer: string,
   score: number,
 ) => {
-  const intent = question.trim().replace(/[。！？!?]+$/u, '');
   return (
     score === -1 ||
     score === 4 ||
-    /^(?:请|帮我|我要|我想|请帮我)?(?:转接?|找|联系)?(?:人工(?:客服|坐席)?|客服)(?:吧|吗|可以吗)?$/u.test(
-      intent,
+    requestsHumanSupport(question) ||
+    /^(?:试过了[，, ]*)?(?:没解决|没有解决|未解决|还是不行)$/u.test(
+      question.trim().replace(/[。！？!?]+$/u, ''),
     ) ||
-    /^(?:试过了[，, ]*)?(?:没解决|没有解决|未解决|还是不行)$/u.test(intent) ||
     /无法回答|无法解决|不能解决|请联系[^，。\n]*人工客服|需要[^，。\n]*客服(?:核实|处理)/u.test(
       answer,
     )

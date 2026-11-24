@@ -67,9 +67,17 @@ import {
   StyledUserBubble,
 } from './StyledComponents';
 import { handleThinkingContent } from './utils';
-import { UDESK_LINK, openUdesk, shouldOfferHumanSupport } from './udesk';
+import {
+  UDESK_LINK,
+  openUdesk,
+  requestsHumanSupport,
+  shouldOfferHumanSupport,
+} from './udesk';
 
 import { getImagePath } from '@/utils/getImagePath';
+
+const getDisplayedAnswer = ({ q, a }: ConversationItem) =>
+  requestsHumanSupport(q) ? '请点击下方按钮联系人工客服。' : a;
 
 export interface ConversationItem {
   image_paths: string[];
@@ -1009,7 +1017,10 @@ const AiQaContent: React.FC<{
 
                 {/* AI回答内容 */}
                 <StyledAiBubbleContent>
-                  <MarkDown2 content={item.a} autoScroll={false} />
+                  <MarkDown2
+                    content={getDisplayedAnswer(item)}
+                    autoScroll={false}
+                  />
                 </StyledAiBubbleContent>
 
                 {shouldOfferHumanSupport(item.q, item.a, item.score) &&
@@ -1065,7 +1076,7 @@ const AiQaContent: React.FC<{
                       <IconCopy
                         sx={{ cursor: 'pointer' }}
                         onClick={() => {
-                          copyText(item.a);
+                          copyText(getDisplayedAnswer(item));
                         }}
                       />
 
