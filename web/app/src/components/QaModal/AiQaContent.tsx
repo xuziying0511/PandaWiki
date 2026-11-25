@@ -15,6 +15,9 @@ import SSEClient, { SSEHttpError } from '@/utils/fetch';
 import { Image as ImagePreview, message } from '@ctzhian/ui';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import {
   Box,
   Button,
@@ -67,7 +70,17 @@ import {
   StyledUserBubble,
 } from './StyledComponents';
 import { handleThinkingContent } from './utils';
+import {
+  UDESK_LINK,
+  openUdesk,
+  requestsHumanSupport,
+  shouldOfferHumanSupport,
+} from './udesk';
+
 import { getImagePath } from '@/utils/getImagePath';
+
+const getDisplayedAnswer = ({ q, a }: ConversationItem) =>
+  requestsHumanSupport(q) ? '您可以联系人工客服，获取进一步的业务协助。' : a;
 
 export interface ConversationItem {
   image_paths: string[];
@@ -139,6 +152,8 @@ const AiQaContent: React.FC<{
   const lastResultExpendRef = useRef(false);
   const [fullAnswer, setFullAnswer] = useState<string>('');
   const [conversation, setConversation] = useState<ConversationItem[]>([]);
+  const [openingUdesk, setOpeningUdesk] = useState(false);
+  const [udeskFallback, setUdeskFallback] = useState(false);
   const [loading, setLoading] = useState(false);
   const [thinking, setThinking] = useState<keyof typeof AnswerStatus>(4);
   const [nonce, setNonce] = useState('');
@@ -890,7 +905,11 @@ const AiQaContent: React.FC<{
               )}
 
               {/* 用户问题气泡 - 右对齐 */}
-              {item.q && <StyledUserBubble>{item.q}</StyledUserBubble>}
+              {item.q && (
+                <StyledUserBubble>
+                  {requestsHumanSupport(item.q) ? '转人工客服' : item.q}
+                </StyledUserBubble>
+              )}
               {/* AI回答气泡 - 左对齐 */}
               <StyledAiBubble>
                 {/* 搜索结果 */}
@@ -1005,8 +1024,98 @@ const AiQaContent: React.FC<{
 
                 {/* AI回答内容 */}
                 <StyledAiBubbleContent>
-                  <MarkDown2 content={item.a} autoScroll={false} />
+                  {shouldOfferHumanSupport(item.q, item.a, item.score) && (
+                    <Stack
+                      direction='row'
+                      alignItems='center'
+                      gap={1}
+                      sx={{ mb: 1 }}
+                    >
+                      <SmartToyOutlinedIcon fontSize='small' color='primary' />
+                      <Typography variant='body2' color='text.secondary'>
+                        智小采 AI 助手
+                      </Typography>
+                    </Stack>
+                  )}
+                  <MarkDown2
+                    content={getDisplayedAnswer(item)}
+                    autoScroll={false}
+                  />
                 </StyledAiBubbleContent>
+
+                {shouldOfferHumanSupport(item.q, item.a, item.score) && (
+                  <Box
+                    sx={theme => ({
+                      mt: 1.5,
+                      p: 2,
+                      border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                      borderRadius: 2,
+                      backgroundColor: alpha(theme.palette.primary.main, 0.03),
+                    })}
+                  >
+                    <Stack direction='row' alignItems='center' gap={1.5}>
+                      <Box
+                        sx={theme => ({
+                          width: 44,
+                          flexShrink: 0,
+                          height: 44,
+                          display: 'grid',
+                          placeItems: 'center',
+                          borderRadius: 1.5,
+                          color: 'primary.main',
+                          backgroundColor: alpha(
+                            theme.palette.primary.main,
+                            0.1,
+                          ),
+                        })}
+                      >
+                        <SupportAgentIcon />
+                      </Box>
+                      <Box>
+                        <Typography fontWeight={600}>人工客服</Typography>
+                        <Typography variant='body2' color='text.secondary'>
+                          为您提供专业的业务咨询与问题处理服务
+                        </Typography>
+                      </Box>
+                    </Stack>
+                    {udeskFallback ? (
+                      <Button
+                        fullWidth
+                        href={UDESK_LINK}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        variant='contained'
+                        startIcon={<SupportAgentIcon />}
+                        endIcon={<ArrowForwardIcon />}
+                        sx={{ mt: 1.5, minHeight: 48, boxShadow: 'none' }}
+                      >
+                        联系人工客服
+                      </Button>
+                    ) : (
+                      <Button
+                        fullWidth
+                        variant='contained'
+                        startIcon={<SupportAgentIcon />}
+                        endIcon={<ArrowForwardIcon />}
+                        disabled={openingUdesk}
+                        onClick={async () => {
+                          setOpeningUdesk(true);
+                          try {
+                            await openUdesk();
+                          } catch {
+                            setUdeskFallback(true);
+                            message.error('客服面板未打开，请使用下方链接');
+                          } finally {
+                            setOpeningUdesk(false);
+                          }
+                        }}
+                        sx={{ mt: 1.5, minHeight: 48, boxShadow: 'none' }}
+                      >
+                        {openingUdesk ? '正在打开客服…' : '联系人工客服'}
+                      </Button>
+                    )}
+                  </Box>
+                )}
 
                 {/* 操作按钮 */}
                 {(index !== conversation.length - 1 || !loading) && (
@@ -1027,7 +1136,7 @@ const AiQaContent: React.FC<{
                       <IconCopy
                         sx={{ cursor: 'pointer' }}
                         onClick={() => {
-                          copyText(item.a);
+                          copyText(getDisplayedAnswer(item));
                         }}
                       />
                     </Stack>
